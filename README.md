@@ -25,8 +25,20 @@ the camera poses from the observations.
 
 ***
 
+### Before calibration
+![The uncalibrated camera pose.](https://github.com/Brucknem/GuidedResearch/blob/main/report/images/calibration/background_uncalibrated_with_mapping.png?raw=true)
+<p align="center">
+Points of permanent delineators mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
+The mapping from the projected points to their expected pixels is drawn in light blue.
+</p>
 
-
+### After calibration
+![The calibrated camera pose.](https://github.com/Brucknem/GuidedResearch/blob/main/report/images/calibration/background_calibrated.png?raw=true)
+<p align="center">
+The same points after the calibration procedure.
+The rendered positions of the mapped points align with their respective pixels.
+The drawn mapping disappears as the distances approach 0.
+</p>
 ***
 
 # Running in Standalone Mode
