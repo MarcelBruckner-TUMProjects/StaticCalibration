@@ -28,7 +28,7 @@ the camera poses from the observations.
 ### Before calibration
 ![The uncalibrated camera pose.](https://github.com/Brucknem/GuidedResearch/blob/main/report/images/calibration/background_uncalibrated_with_mapping.png?raw=true)
 <p align="center">
-Points of permanent delineators mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
+Points of permanent delineators from the HD map mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
 The mapping from the projected points to their expected pixels is drawn in light blue.
 </p>
 
