@@ -44,6 +44,8 @@ The drawn mapping disappears as the distances approach 0.
 
 # Running in Standalone Mode
 
+This part is currently work in progress and will be updated in the next days.
+
 ***
 
 # Dependencies
@@ -64,8 +66,9 @@ There is no way to automate this proces as it is dependend on your system.
 - [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) - With CUDA support for the dynamic
   stabilization
 
-To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](../main/setup_ceres_opencv.sh). This
-should install all necessary dependencies and pull & compile the libraries from source. This might be outdated by now.
+To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](/extern/setup_ceres_opencv.sh). 
+This should install all necessary dependencies and pull & compile the libraries from source. 
+This might be outdated by now, but I will update the script in the next days.  
 If compile errors arise, the CMake output is a good start to debug.
 
 - [Boost](https://www.boost.org/)
