@@ -39,6 +39,7 @@ The same points after the calibration procedure.
 The rendered positions of the mapped points align with their respective pixels.
 The drawn mapping disappears as the distances approach 0.
 </p>
+
 ***
 
 # Running in Standalone Mode
