@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 project(StaticCalibration C CXX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
 
-option(WITH_OPENCV "Compile with Open CV for rendering." ON)
+option(WITH_OPENCV "Compile with Open CV for rendering." OFF)
 option(WITH_TESTS "Compile with tests." ON)
 
 configure_file(CMakeConfig.h.in CMakeConfig.h)

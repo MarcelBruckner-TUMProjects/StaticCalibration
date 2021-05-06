@@ -80,6 +80,7 @@ latex/*
 
 # CMake
 cmake-**/**
+build
 
 .history
 .vscode

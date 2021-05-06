@@ -39,15 +39,14 @@ endif ()
 ########################################################################################################################
 ### Packages ###
 ########################################################################################################################
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 ########################################################################################################################
 ### TESTING ###
 ########################################################################################################################
-add_executable(Tests ImageTestBase.cpp CameraTestBase.cpp
+add_executable(Tests
+        CameraTestBase.cpp
         RenderingPipelineTests.cpp
         CameraPoseEstimationTests.cpp
         ResidualsTests.cpp
@@ -55,8 +54,10 @@ add_executable(Tests ImageTestBase.cpp CameraTestBase.cpp
         )
 target_link_libraries(Tests
         PUBLIC StaticCalibration-lib
-        gtest_main ${OpenCV_LIBS} Eigen3::Eigen)
-target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}"  ${PROJECT_SOURCE_DIR}/include)
+        gtest_main
+        Eigen3::Eigen
+        )
+target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}" ${PROJECT_SOURCE_DIR}/include)
 
 include_directories(../misc/)
 add_test(AllTests Tests)
