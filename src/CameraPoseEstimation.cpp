@@ -116,9 +116,9 @@ namespace static_calibration {
             }
             foundValidSolution = i < maxTriesUntilAbort;
             optimizationFinished = true;
-//            if (logSummary) {
-            std::cout << *this << std::endl;
-//            }
+            if (logSummary) {
+                std::cout << *this << std::endl;
+            }
 
         }
 
