@@ -53,3 +53,10 @@ target_link_libraries(EvaluateStaticCalibration
         )
 
 target_include_directories(EvaluateStaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")
+
+if (WITH_COVERAGE)
+    setup_target_for_coverage_gcovr_xml(
+            NAME EvaluateStaticCalibration_coverage
+            EXECUTABLE EvaluateStaticCalibration -j ${PROCESSOR_COUNT}
+    )
+endif ()

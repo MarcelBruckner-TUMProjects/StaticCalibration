@@ -105,7 +105,7 @@ int main(int argc, char const *argv[]) {
     auto csvWriter = initCSVWriters();
 
 #ifdef WITH_OPENCV
-    cv::Mat evaluationFrame = cv::imread("../misc/test_frame.png");
+    cv::Mat evaluationFrame = cv::imread(parsedOptions.evaluationBackgroundFrame);
     evaluationFrame = addAlphaChannel(evaluationFrame);
     cv::Mat finalFrame;
 
@@ -120,10 +120,19 @@ int main(int argc, char const *argv[]) {
 #endif //WITH_OPENCV
 
     int run = -1;
-    for (int i = 0; i < 1e10; ++i) {
+    int maxRuns = parsedOptions.evaluationRuns;
+
+#ifdef WITH_COVERAGE
+    maxRuns = 1;
+#endif //WITH_COVERAGE
+
+    for (int i = 0;; ++i) {
         if (estimator.isEstimationFinished()) {
             if (run >= 0) {
                 writeToCSV(csvWriter, run, estimator);
+            }
+            if (run >= maxRuns) {
+                break;
             }
             run++;
             estimator.clearWorldObjects();

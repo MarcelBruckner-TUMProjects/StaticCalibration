@@ -41,6 +41,7 @@ endif ()
 ########################################################################################################################
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+include_directories(../misc/)
 
 ########################################################################################################################
 ### TESTING ###
@@ -59,5 +60,11 @@ target_link_libraries(Tests
         )
 target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}" ${PROJECT_SOURCE_DIR}/include)
 
-include_directories(../misc/)
+if (WITH_COVERAGE)
+    setup_target_for_coverage_gcovr_xml(
+            NAME Tests_coverage
+            EXECUTABLE Tests -j ${PROCESSOR_COUNT}
+    )
+endif ()
+
 add_test(AllTests Tests)

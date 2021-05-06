@@ -19,6 +19,7 @@ namespace static_calibration {
 #define OBJECTS_FILE_OPTION_NAME std::string("objects_file")
 #define PIXELS_FILE_OPTION_NAME std::string("pixels_file")
 #define EVALUATION_BACKGROUND_FRAME_OPTION_NAME std::string("evaluation_background_frame")
+#define EVALUATION_RUNS_OPTION_NAME std::string("evaluation_runs")
 #define FOCAL_LENGTH_OPTION_NAME std::string("focal_length")
 #define FOCAL_LENGTH_RATIO_OPTION_NAME std::string("focal_length_ratio")
 #define IMAGE_SIZE_OPTION_NAME std::string("image_size")
@@ -56,6 +57,13 @@ namespace static_calibration {
                      " The path can be relative or absolute."
                     );
 #endif //WITH_OPENCV
+
+#ifndef WITH_COVERAGE
+            desc.add_options()
+                    ((EVALUATION_RUNS_OPTION_NAME + ",n").c_str(),
+                     boost::program_options::value<int>()->default_value(1000000),
+                     "The number of runs performed during evaluation.");
+#endif //WITH_COVERAGE
 
             desc.add_options()
                     ((IMAGE_SIZE_OPTION_NAME + ",i").c_str(),
@@ -125,9 +133,21 @@ namespace static_calibration {
                 exit(EXIT_SUCCESS);
             }
 
+            std::string evaluationBackgroundFrame;
+#ifdef WITH_OPENCV
+            evaluationBackgroundFrame = variables_map[EVALUATION_BACKGROUND_FRAME_OPTION_NAME].as<std::string>();
+#endif //WITH_OPENCV
+
+            int evaluationRuns = 1;
+#ifndef WITH_COVERAGE
+            evaluationRuns = variables_map[EVALUATION_RUNS_OPTION_NAME].as<int>();
+#endif //WITH_COVERAGE
+
             ParsedOptions parsedOptions{
                     variables_map[OBJECTS_FILE_OPTION_NAME].as<std::string>(),
                     variables_map[PIXELS_FILE_OPTION_NAME].as<std::string>(),
+                    evaluationBackgroundFrame,
+                    evaluationRuns,
                     parseVectorValue(variables_map[IMAGE_SIZE_OPTION_NAME].as<std::string>()).cast<int>(),
                     variables_map[FOCAL_LENGTH_OPTION_NAME].as<double>(),
                     variables_map[FOCAL_LENGTH_RATIO_OPTION_NAME].as<double>(),

@@ -32,6 +32,16 @@ namespace static_calibration {
             std::string pixelsFile;
 
             /**
+             * The path to the background image rendered during evaluation.
+             */
+            std::string evaluationBackgroundFrame;
+
+            /**
+             * The number of evaluation runs.
+             */
+            int evaluationRuns;
+
+            /**
              * The size in pixels of the camera frame output.
              */
             Eigen::Vector2i imageSize;

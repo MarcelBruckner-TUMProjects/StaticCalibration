@@ -1,1 +1,2 @@
 #cmakedefine WITH_OPENCV
+#cmakedefine WITH_COVERAGE
