@@ -59,12 +59,12 @@ target_link_libraries(Tests
         Eigen3::Eigen
         )
 target_include_directories(Tests PUBLIC tests "${PROJECT_BINARY_DIR}" ${PROJECT_SOURCE_DIR}/include)
-
-if (WITH_COVERAGE)
-    setup_target_for_coverage_gcovr_xml(
-            NAME Tests_coverage
-            EXECUTABLE Tests -j ${PROCESSOR_COUNT}
-    )
-endif ()
+#
+#if (WITH_COVERAGE)
+#    setup_target_for_coverage_gcovr_xml(
+#            NAME Tests_coverage
+#            EXECUTABLE Tests -j ${PROCESSOR_COUNT}
+#    )
+#endif ()
 
 add_test(AllTests Tests)

@@ -14,14 +14,14 @@ configure_file(CMakeConfig.h.in CMakeConfig.h)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 
-if (WITH_COVERAGE)
-    set(CMAKE_BUILD_TYPE Debug)
-    include(CodeCoverage)
-    append_coverage_compiler_flags()
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
-endif ()
+#if (WITH_COVERAGE)
+#    set(CMAKE_BUILD_TYPE Debug)
+#    include(CodeCoverage)
+#    append_coverage_compiler_flags()
+#
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
+#endif ()
 
 ########################################################################################################################
 ### Standalone App ###
