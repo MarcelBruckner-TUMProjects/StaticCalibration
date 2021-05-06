@@ -74,6 +74,12 @@ cmake --build . -j8
 ./app/StaticCalibration -h 
 ```
 
+### Evaluating
+
+```shell
+./evaluate/EvaluateStaticCalibration -h 
+```
+
 ### Testing
 
 ```shell
