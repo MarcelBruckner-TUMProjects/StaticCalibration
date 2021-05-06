@@ -63,7 +63,8 @@ cmake --build . -j8
 
 -DWITH_TESTS=ON/OFF     # Build with tests. 
 
--DWITH_OPENCV=ON/OFF    # Build with OpenCV. Set to ON to render the projected world objects during optimization. 
+-DWITH_OPENCV=ON/OFF    # Build with OpenCV. 
+                        # Set to ON to render the projected world objects during optimization. 
 
 ```
 
