@@ -8,7 +8,7 @@
 
 #include "glog/logging.h"
 
-#include "CommandLineParser.hpp"
+#include "StaticCalibration/utils/CommandLineParser.hpp"
 
 int main(int argc, char const *argv[]) {
     srandom(time(nullptr));

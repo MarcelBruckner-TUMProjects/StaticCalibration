@@ -36,6 +36,9 @@ endif ()
 find_package(Ceres REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
+find_package(Boost REQUIRED COMPONENTS program_options REQUIRED filesystem REQUIRED date_time)
+include_directories(${Boost_INCLUDE_DIRS})
+
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 ########################################################################################################################
@@ -52,6 +55,7 @@ add_library(StaticCalibration-lib
         objects/WorldObject.cpp
         objects/ObjectsLoading.cpp
         objects/YAMLExtension.cpp
+        utils/CommandLineParser.cpp
         )
 
 target_include_directories(StaticCalibration-lib
@@ -63,9 +67,7 @@ target_include_directories(StaticCalibration-lib
 target_link_libraries(StaticCalibration-lib
         Eigen3::Eigen
         Ceres::ceres
-        ${Boost_LIBRARIES}
         yaml-cpp
+        ${Boost_LIBRARIES}
         ${EXTRA_LIBS}
         )
-
-
