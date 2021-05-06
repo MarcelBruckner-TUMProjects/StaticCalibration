@@ -46,8 +46,6 @@ The drawn mapping disappears as the distances approach 0.
 
 # Running in Standalone Mode
 
-This part is currently work in progress and will be updated in the next days.
-
 ### See below for the necessary dependencies.
 
 ### Compiling
@@ -56,6 +54,17 @@ This part is currently work in progress and will be updated in the next days.
 mkdir build && cd build
 cmake ..
 cmake --build . -j8
+```
+
+#### CMake Configure Options
+
+```shell
+# Default is OFF for all options
+
+-DWITH_TESTS=ON/OFF     # Build with tests. 
+
+-DWITH_OPENCV=ON/OFF    # Build with OpenCV. Set to ON to render the projected world objects during optimization. 
+
 ```
 
 ### Running
@@ -76,6 +85,8 @@ ctest --verbose
 
 ## External Dependencies
 
+`# Only necessary if compiling with -DWITH_OPENCV=ON`
+
 These dependencies have to be installed on your system. Follow their instructions on how to install them.
 
 - [CUDA](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) - You have to install CUDA and the
@@ -88,18 +99,18 @@ There is no way to automate this proces as it is dependend on your system.
 - [CMake](https://cmake.org/) - For building the libraries
 - [Ceres Solver](http://ceres-solver.org/) - The non-linear solver for the static calibration
 - [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) - With CUDA support for the dynamic
-  stabilization
+  stabilization `# Only necessary if compiling with -DWITH_OPENCV=ON`
 
 To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](/extern/setup_ceres_opencv.sh). This
 should install all necessary dependencies and pull & compile the libraries from source. This might be outdated by now,
 but I will update the script in the next days.  
 If compile errors arise, the CMake output is a good start to debug.
 
-- [Boost](https://www.boost.org/)
+- [Boost](https://www.boost.org/) - For parsing the command line options
 
 ## Internal Dependencies
 
 These dependencies are pulled by CMake when the project is built. You `do not` have to install them manually.
 
-- [GoogleTest](https://github.com/google/googletest)
+- [GoogleTest](https://github.com/google/googletest) `# Only built if compiling with -DWITH_TESTS=ON`
 - [YAML-CPP](https://github.com/jbeder/yaml-cpp.git)

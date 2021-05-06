@@ -7,7 +7,7 @@ project(StaticCalibration C CXX)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
 
 option(WITH_OPENCV "Compile with Open CV for rendering." OFF)
-option(WITH_TESTS "Compile with tests." ON)
+option(WITH_TESTS "Compile with tests." OFF)
 
 configure_file(CMakeConfig.h.in CMakeConfig.h)
 
