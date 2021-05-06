@@ -4,11 +4,7 @@
 #include <iostream>
 #include "CMakeConfig.h"
 
-#ifdef WITH_OPENCV
 
-#include <thread>
-#include <boost/algorithm/string/split.hpp>
-#include "Eigen/Dense"
 #include "StaticCalibration/camera/RenderingPipeline.hpp"
 #include "StaticCalibration/objects/WorldObject.hpp"
 #include "StaticCalibration/objects/ObjectsLoading.hpp"
@@ -16,11 +12,12 @@
 #include "StaticCalibration/utils/CommandLineParser.hpp"
 #include "CSVWriter.hpp"
 
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <utility>
+#include "Eigen/Dense"
 #include "glog/logging.h"
 
+#ifdef WITH_OPENCV
+
+#include <opencv2/opencv.hpp>
 
 /**
  * Renders the current state of the estimator and some exemplary text onto the frame.
@@ -70,6 +67,8 @@ void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibrati
  */
 cv::Mat addAlphaChannel(const cv::Mat &mat);
 
+#endif //WITH_OPENCV
+
 /**
  * Initializes a writer to csv for the estimation results.
  *
@@ -103,31 +102,26 @@ int main(int argc, char const *argv[]) {
     estimator.guessIntrinsics(parsedOptions.focalLength, parsedOptions.focalLengthRatio,
                               parsedOptions.principalPoint,
                               parsedOptions.skew);
+    auto csvWriter = initCSVWriters();
 
+#ifdef WITH_OPENCV
     cv::Mat evaluationFrame = cv::imread("../misc/test_frame.png");
     evaluationFrame = addAlphaChannel(evaluationFrame);
     cv::Mat finalFrame;
-
-    bool optimizationFinished;
-    Eigen::Vector3d translation;
-    Eigen::Vector3d rotation;
-    std::vector<double> intrinsics;
-
-    auto csvWriter = initCSVWriters();
 
     const char *windowName = "Evaluate Static Calibration";
     cv::namedWindow(windowName);
     int trackbarShowIds = 0;
     cv::createTrackbar("Show IDs", windowName, &trackbarShowIds, 1);
 
-    int run = -1;
-    while (true) {
-        optimizationFinished = estimator.isEstimationFinished();
-        translation = estimator.getTranslation();
-        rotation = estimator.getRotation();
-        intrinsics = estimator.getIntrinsics();
+    Eigen::Vector3d translation;
+    Eigen::Vector3d rotation;
+    std::vector<double> intrinsics;
+#endif //WITH_OPENCV
 
-        if (optimizationFinished) {
+    int run = -1;
+    for (int i = 0; i < 1e10; ++i) {
+        if (estimator.isEstimationFinished()) {
             if (run >= 0) {
                 writeToCSV(csvWriter, run, estimator);
             }
@@ -137,9 +131,17 @@ int main(int argc, char const *argv[]) {
             estimator.guessIntrinsics(parsedOptions.focalLength, parsedOptions.focalLengthRatio,
                                       parsedOptions.principalPoint,
                                       parsedOptions.skew);
-            optimizationFinished = false;
+#ifdef WITH_OPENCV
             estimator.estimateAsync(parsedOptions.logEstimationProgress);
+#else //WITH_OPENCV
+            estimator.estimate(parsedOptions.logEstimationProgress);
+#endif //WITH_OPENCV
         }
+
+#ifdef WITH_OPENCV
+        translation = estimator.getTranslation();
+        rotation = estimator.getRotation();
+        intrinsics = estimator.getIntrinsics();
 
         finalFrame = evaluationFrame * 0.5;
         render(finalFrame, objects, translation, rotation, intrinsics, trackbarShowIds);
@@ -149,6 +151,7 @@ int main(int argc, char const *argv[]) {
         if ((char) cv::waitKey(1) == 'q') {
             break;
         }
+#endif //WITH_OPENCV
     }
 
     return EXIT_SUCCESS;
@@ -157,6 +160,8 @@ int main(int argc, char const *argv[]) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef WITH_OPENCV
 
 /**
  * Renders the given line onto the frame.
@@ -262,6 +267,8 @@ void renderText(cv::Mat &finalFrame, const static_calibration::calibration::Came
     }
 }
 
+#endif //WITH_OPENCV
+
 static_calibration::evaluation::CSVWriter *initCSVWriters() {
     auto csvWriter = new static_calibration::evaluation::CSVWriter(std::string("evaluation.csv"));
 
@@ -327,15 +334,3 @@ void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
                << max_w
                << static_calibration::evaluation::newline;
 }
-
-
-#else //WITH_OPENCV
-
-int main(int argc, char const *argv[]) {
-    std::cout << "Please compile with OpenCV to evaluate." << std::endl;
-    std::cout << "To compile with OpenCV add the flag -DWITH_OPENCV=ON to the cmake configure step." << std::endl;
-
-    return 0;
-}
-
-#endif //WITH_OPENCV
