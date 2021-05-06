@@ -1,6 +1,10 @@
 //
 // Created by brucknem on 02.02.21.
 //
+#include <iostream>
+#include "CMakeConfig.h"
+
+#ifdef WITH_OPENCV
 
 #include <thread>
 #include <boost/algorithm/string/split.hpp>
@@ -15,6 +19,7 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include "glog/logging.h"
+
 
 using namespace static_calibration::evaluation;
 
@@ -380,3 +385,14 @@ int main(int argc, char const *argv[]) {
     setup.mainLoop();
     return 0;
 }
+
+#else //WITH_OPENCV
+
+int main(int argc, char const *argv[]) {
+    std::cout << "Please compile with OpenCV to evaluate." << std::endl;
+    std::cout << "To compile with OpenCV add the flag -DWITH_OPENCV=ON to the cmake configure step." << std::endl;
+
+    return 0;
+}
+
+#endif //WITH_OPENCV

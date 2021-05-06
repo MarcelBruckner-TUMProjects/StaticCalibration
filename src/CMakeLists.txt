@@ -26,14 +26,15 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
 ### Library ###
 ########################################################################################################################
 
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
+if (WITH_OPENCV)
+    find_package(OpenCV REQUIRED)
+    include_directories(${OpenCV_INCLUDE_DIRS})
+
+    list(APPEND EXTRA_LIBS ${OpenCV_LIBS})
+endif ()
 
 find_package(Ceres REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-
-find_package(Boost REQUIRED COMPONENTS program_options)
-include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
@@ -56,14 +57,15 @@ add_library(StaticCalibration-lib
 target_include_directories(StaticCalibration-lib
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
         PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+        PUBLIC "${PROJECT_BINARY_DIR}"
         )
 
 target_link_libraries(StaticCalibration-lib
         Eigen3::Eigen
         Ceres::ceres
-        ${OpenCV_LIBS}
         ${Boost_LIBRARIES}
         yaml-cpp
+        ${EXTRA_LIBS}
         )
 
 

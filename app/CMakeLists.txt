@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.10)
 ########################################################################################################################
 ### Packages ###
 ########################################################################################################################
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS program_options REQUIRED filesystem REQUIRED date_time)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -30,5 +28,5 @@ target_link_libraries(AppUtils ${Boost_LIBRARIES} Eigen3::Eigen)
 ########################################################################################################################
 
 add_executable(StaticCalibration StaticCalibration.cpp CommandLineParser.cpp CommandLineParser.hpp)
-target_link_libraries(StaticCalibration StaticCalibration-lib AppUtils ${OpenCV_LIBS} Eigen3::Eigen)
+target_link_libraries(StaticCalibration StaticCalibration-lib AppUtils Eigen3::Eigen)
 target_include_directories(StaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")

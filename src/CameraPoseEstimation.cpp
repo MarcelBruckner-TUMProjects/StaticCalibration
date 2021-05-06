@@ -4,9 +4,7 @@
 
 #include "StaticCalibration/CameraPoseEstimation.hpp"
 
-#include <utility>
 #include "ceres/autodiff_cost_function.h"
-#include <limits>
 #include <thread>
 
 namespace static_calibration {
@@ -48,7 +46,9 @@ namespace static_calibration {
 
             if (!hasRotationGuess) {
                 double x = 35.;
-                initialRotation = {rng.uniform(-x, x), rng.uniform(-x, x), rng.uniform(-x, x)};
+                initialRotation = {generateRandomNumber(-x, x),
+                                   generateRandomNumber(-x, x),
+                                   generateRandomNumber(-x, x)};
                 rotation = initialRotation;
             }
         }
@@ -467,6 +467,14 @@ namespace static_calibration {
             std::stringstream ss;
             ss << "[" << vector.x() << ", " << vector.y() << ", " << vector.z() << "]";
             return ss.str();
+        }
+
+        double generateRandomNumber(double lower, double upper, int precision) {
+            long randomNumber = random();
+            int interval = (int) ((upper - lower) * std::pow(10, precision));
+            randomNumber = randomNumber % interval;
+            double rescale = (double) randomNumber / std::pow(10., precision);
+            return rescale + lower;
         }
     }
 }

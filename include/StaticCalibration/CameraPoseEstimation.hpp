@@ -14,7 +14,6 @@
 #include "ceres/ceres.h"
 #include "glog/logging.h"
 
-#include "opencv2/opencv.hpp"
 #include "residuals/CorrespondenceResidual.hpp"
 #include "residuals/DistanceFromIntervalResidual.hpp"
 #include "residuals/DistanceResidual.hpp"
@@ -34,6 +33,16 @@ namespace static_calibration {
         std::string printVectorRow(std::vector<double> vector);
 
         /**
+         * Generates a random number for the initial guesses within the given interval.
+         *
+         * @param lower The lower bound of the interval.
+         * @param upper The upper bound of the interval.
+         *
+         * @return A random number in the interval
+         */
+        static double generateRandomNumber(double lower, double upper, int precision = 3);
+
+        /**
          * Estimates the camera pose from some known correspondences between the world and image.
          *
          * Minimizes the reprojection-error, i.e. x_c = pi(T * R * X_c) for all c in correspondences.
@@ -41,11 +50,6 @@ namespace static_calibration {
          */
         class CameraPoseEstimation {
         private:
-            /**
-             * Random number generator for the uniform distribution on the rotation guess.
-             */
-            cv::RNG rng;
-
             /**
              * The ids of the correspondence residual blocks.
              */

@@ -26,6 +26,7 @@ the camera poses from the observations.
 ***
 
 ### Before calibration
+
 ![The uncalibrated camera pose.](https://github.com/Brucknem/GuidedResearch/blob/main/report/images/calibration/background_uncalibrated_with_mapping.png?raw=true)
 <p align="center">
 Points of permanent delineators from the HD map mapped to pixel locations (green) and points without known corresponding pixels (red) rendered by a poorly calibrated camera model.
@@ -33,6 +34,7 @@ The mapping from the projected points to their expected pixels is drawn in light
 </p>
 
 ### After calibration
+
 ![The calibrated camera pose.](https://github.com/Brucknem/GuidedResearch/blob/main/report/images/calibration/background_calibrated.png?raw=true)
 <p align="center">
 The same points after the calibration procedure.
@@ -45,6 +47,28 @@ The drawn mapping disappears as the distances approach 0.
 # Running in Standalone Mode
 
 This part is currently work in progress and will be updated in the next days.
+
+### See below for the necessary dependencies.
+
+### Compiling
+
+```shell
+mkdir build && cd build
+cmake ..
+cmake --build . -j8
+```
+
+### Running
+
+```shell
+./app/StaticCalibration -h 
+```
+
+### Testing
+
+```shell
+ctest --verbose
+```
 
 ***
 
@@ -66,9 +90,9 @@ There is no way to automate this proces as it is dependend on your system.
 - [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) - With CUDA support for the dynamic
   stabilization
 
-To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](/extern/setup_ceres_opencv.sh). 
-This should install all necessary dependencies and pull & compile the libraries from source. 
-This might be outdated by now, but I will update the script in the next days.  
+To facilitate the setup of CMake, Ceres and OpenCV you can use the [setup script](/extern/setup_ceres_opencv.sh). This
+should install all necessary dependencies and pull & compile the libraries from source. This might be outdated by now,
+but I will update the script in the next days.  
 If compile errors arise, the CMake output is a good start to debug.
 
 - [Boost](https://www.boost.org/)
