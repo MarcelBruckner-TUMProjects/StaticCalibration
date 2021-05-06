@@ -5,7 +5,9 @@
 #include "CMakeConfig.h"
 
 #ifdef WITH_OPENCV
+
 #include <opencv2/opencv.hpp>
+
 #endif //WITH_OPENCV
 
 #include <iostream>
@@ -20,7 +22,6 @@
 
 namespace static_calibration {
     namespace evaluation {
-        class TrackerWrapper;
 
         class CSVWriter {
             std::ofstream fs_;
@@ -49,9 +50,11 @@ namespace static_calibration {
             CSVWriter &operator<<(const std::string &val);
 
 #ifdef WITH_OPENCV
+
             CSVWriter &operator<<(const cv::Rect &val);
 
             CSVWriter &operator<<(const cv::Point2d &val);
+
 #endif //WITH_OPENCV
 
             CSVWriter &operator<<(const Eigen::Vector3d &val);

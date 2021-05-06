@@ -21,47 +21,6 @@
 #include <utility>
 #include "glog/logging.h"
 
-//
-//void initCSVWriters() {
-//    auto pixelsFilePath = boost::filesystem::path(pixelsFile);
-//    evaluationPath =
-//            outputFolder / "StaticCalibration" / pixelsFilePath.parent_path().filename();
-//    if (!boost::filesystem::is_directory(evaluationPath)) {
-//        boost::filesystem::create_directories(evaluationPath);
-//    }
-//    auto suffix = getNowSuffix();
-//    extrinsicParametersWriter = new CSVWriter(
-//            evaluationPath / (pixelsFilePath.filename().string() + suffix + ".csv"));
-//
-//    *extrinsicParametersWriter << "Run"
-//                               << "Correspondences"
-//                               << "Penalize Scale [Lambdas]"
-//                               << "Penalize Scale [Rotation]"
-//                               << "Penalize Scale [Weights]"
-//                               << "Valid Solution"
-//                               << "Loss"
-//                               << "Loss [Correspondences]"
-//                               << "Loss [Lambdas]"
-//                               << "Loss [Intrinsics]"
-//                               << "Loss [Rotations]"
-//                               << "Loss [Weights]"
-//                               << "Translation [x]"
-//                               << "Translation [y]"
-//                               << "Translation [z]"
-//                               << "Rotation [x]"
-//                               << "Rotation [y]"
-//                               << "Rotation [z]"
-//                               << "Focal Length"
-//                               << "Focal Length [Ratio]"
-//                               << "Principal Point [u]"
-//                               << "Principal Point [v]"
-//                               << "Skew"
-//                               << "Weights [Avg]"
-//                               << "Weights [Min]"
-//                               << "Weights [Max]"
-//                               << newline
-//                               << flush;
-//}
 
 /**
  * Renders the current state of the estimator and some exemplary text onto the frame.
@@ -111,14 +70,28 @@ void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibrati
  */
 cv::Mat addAlphaChannel(const cv::Mat &mat);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Initializes a writer to csv for the estimation results.
+ *
+ * @return The writer.
+ */
+static_calibration::evaluation::CSVWriter *initCSVWriters();
 
 /**
- * main
+ * Writes the values of the estimator to csv.
+ *
+ * @param csvWriter The csv writer.
+ * @param run The current estimation run.
+ * @param estimator The pose estimator.
  */
+void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
+                static_calibration::calibration::CameraPoseEstimation &estimator);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/** main */
 int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::app::parseCommandLine(argc, argv);
@@ -140,14 +113,14 @@ int main(int argc, char const *argv[]) {
     Eigen::Vector3d rotation;
     std::vector<double> intrinsics;
 
-//    initCSVWriters();
+    auto csvWriter = initCSVWriters();
 
     const char *windowName = "Evaluate Static Calibration";
     cv::namedWindow(windowName);
     int trackbarShowIds = 0;
     cv::createTrackbar("Show IDs", windowName, &trackbarShowIds, 1);
 
-    int run = 0;
+    int run = -1;
     while (true) {
         optimizationFinished = estimator.isEstimationFinished();
         translation = estimator.getTranslation();
@@ -155,6 +128,9 @@ int main(int argc, char const *argv[]) {
         intrinsics = estimator.getIntrinsics();
 
         if (optimizationFinished) {
+            if (run >= 0) {
+                writeToCSV(csvWriter, run, estimator);
+            }
             run++;
             estimator.clearWorldObjects();
             estimator.addWorldObjects(objects);
@@ -284,6 +260,72 @@ void renderText(cv::Mat &finalFrame, const static_calibration::calibration::Came
     while (getline(ss, line)) {
         renderLine(finalFrame, line, finalFrame.cols - 800, finalFrame.rows - lineHeight * 11 + i++ * lineHeight - 10);
     }
+}
+
+static_calibration::evaluation::CSVWriter *initCSVWriters() {
+    auto csvWriter = new static_calibration::evaluation::CSVWriter(std::string("evaluation.csv"));
+
+    *csvWriter << "Run"
+               << "Correspondences"
+               << "Valid Solution"
+               << "Loss"
+               << "Loss [Correspondences]"
+               << "Loss [Lambdas]"
+               << "Loss [Intrinsics]"
+               << "Loss [Rotations]"
+               << "Loss [Weights]"
+               << "Translation [x]"
+               << "Translation [y]"
+               << "Translation [z]"
+               << "Rotation [x]"
+               << "Rotation [y]"
+               << "Rotation [z]"
+               << "Focal Length"
+               << "Focal Length [Ratio]"
+               << "Principal Point [u]"
+               << "Principal Point [v]"
+               << "Skew"
+               << "Weights [Avg]"
+               << "Weights [Min]"
+               << "Weights [Max]"
+               << static_calibration::evaluation::newline
+               << static_calibration::evaluation::flush;
+    return csvWriter;
+}
+
+void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
+                static_calibration::calibration::CameraPoseEstimation &estimator) {
+    auto weights = estimator.getWeights();
+
+    double min_w = 1e100;
+    double max_w = -1e100;
+    double sum_w = 0;
+    for (const auto &weight : weights) {
+        if (weight < min_w) {
+            min_w = weight;
+        }
+        if (weight > max_w) {
+            max_w = weight;
+        }
+        sum_w += weight;
+    }
+
+    *csvWriter << run
+               << (int) weights.size()
+               << estimator.hasFoundValidSolution()
+               << estimator.getTotalLoss()
+               << estimator.getCorrespondencesLoss()
+               << estimator.getLambdasLoss()
+               << estimator.getIntrinsicsLoss()
+               << estimator.getRotationsLoss()
+               << estimator.getWeightsLoss()
+               << estimator.getTranslation()
+               << estimator.getRotation()
+               << estimator.getIntrinsics()
+               << sum_w / weights.size()
+               << min_w
+               << max_w
+               << static_calibration::evaluation::newline;
 }
 
 
