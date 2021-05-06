@@ -5,6 +5,8 @@
 #ifndef STATICCALIBRATION_COMMANDLINEPARSER_HPP
 #define STATICCALIBRATION_COMMANDLINEPARSER_HPP
 
+#include "CMakeConfig.h"
+
 #include "Eigen/Dense"
 #include <boost/algorithm/string/split.hpp>
 #include <boost/foreach.hpp>
@@ -59,16 +61,6 @@ namespace static_calibration {
              */
             bool logEstimationProgress;
         };
-
-        /**
-         * Checks the given variable map for the option with the given name.
-         * Prints a help text and stops execution if the name is not present.
-         *
-         * @param variables_map The map of variables to check for the option by name.
-         * @param name The name of the option to check for.
-         */
-        void checkCommandLineOptionPresent(const boost::program_options::variables_map &variables_map,
-                                           const std::string &name);
 
         /**
          * Creates the command line options description wrapper.
