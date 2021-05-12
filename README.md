@@ -153,19 +153,25 @@ See the [README](https://github.com/Brucknem/DataAnnotationTools/blob/main/READM
 
 # Dependencies
 
+<style>
+table {
+    width:100%;
+}
+</style>
+
 ## External Dependencies
 
-| Dependency | Description | Installation | Required | 
+| Dependency | Usage | Installation | Required | 
 | ---------- | ----------- | ------------ | -------- |
 | [Boost](https://www.boost.org/) | Command line parsing | `sudo apt install libboost-all-dev` | Yes |
-| [Ceres Solver](http://ceres-solver.org/) | Non-linear optimization library | `extern/setup_ceres.sh` | Yes |
+| [Ceres Solver](http://ceres-solver.org/) | Non-linear optimization | `extern/setup_ceres.sh` | Yes |
 | [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) | Rendering during evaluation | `extern/setup_opencv.sh` | `-DWITH_OPENCV=ON` |
 
 ## Internal Dependencies
 
 These dependencies are pulled by CMake when the project is built. You `do not` have to install them manually.
 
-| Dependency | Description | Required | 
+| Dependency | Usage | Required | 
 | ---------- | ----------- | -------- |
 | [YAML-CPP](https://github.com/jbeder/yaml-cpp.git) | YAML parser for objects and pixels | Yes |
-| [GoogleTest](https://github.com/google/googletest) | Command line parsing | `-DWITH_TESTS=ON` |
+| [GoogleTest](https://github.com/google/googletest) | Google unit testing framework | `-DWITH_TESTS=ON` |
