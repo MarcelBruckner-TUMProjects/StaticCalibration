@@ -95,7 +95,7 @@ ctest --verbose
 
 The calibration requires a 2D-3D mapping from pixels to objects to estimate the 6DoF pose of the camera.
 
-### Objects
+## Objects
 
 ```shell
 -o [ --objects_file ] <filename>
@@ -118,11 +118,15 @@ objects:
   - …
 ```
 
+### OpenDRIVE Parser
+
 To facilitate the creation of the `objects_file`, we have released an [OpenDRIVE](https://github.com/Brucknem/OpenDRIVE)
 parser that converts from the OpenDRIVE V1.4 standard to our internally used format.  
 See the [README](https://github.com/Brucknem/OpenDRIVE/blob/main/README.md) in the project for the usage.
 
-### Pixels
+***
+
+## Pixels
 
 ```shell
 -p [ --pixels_file ] <filename>
@@ -143,6 +147,8 @@ The `pixels_file` is required to be in the YAML format as specified:
     - …
 - …
 ```
+
+### Frame Annotation Tool
 
 To facilitate the creation of the `pixels_file`, we have released
 an [Annotation Tool](https://github.com/Brucknem/DataAnnotationTools)
