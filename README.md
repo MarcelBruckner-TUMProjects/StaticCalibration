@@ -153,12 +153,6 @@ See the [README](https://github.com/Brucknem/DataAnnotationTools/blob/main/READM
 
 # Dependencies
 
-<style>
-table {
-    width:100%;
-}
-</style>
-
 ## External Dependencies
 
 | Dependency | Usage | Installation | Required | 
