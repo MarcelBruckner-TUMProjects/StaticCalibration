@@ -6,35 +6,6 @@ sudo apt install \
   checkinstall \
   libssl-dev
 
-### CMake
-cmake_version="3.19.1"
-cmake_folder="cmake-$cmake_version"
-cmake_archive="$cmake_folder.tar.gz"
-wget https://github.com/Kitware/CMake/releases/download/v$cmake_version/$cmake_archive
-tar xfv $cmake_archive
-cd $cmake_folder
-./bootstrap 
-make -j 18
-sudo checkinstall
-
-### Ceres
-sudo apt-get install libgoogle-glog-dev libgflags-dev -y
-sudo apt-get install libatlas-base-dev -y
-sudo apt-get install libeigen3-dev -y
-sudo apt-get install libsuitesparse-dev -y
-
-cd $working_directory
-ceres_version=ceres-solver-2.0.0
-ceres_archive=$ceres_version.tar.gz
-wget http://ceres-solver.org/$ceres_archive
-tar xfv $ceres_archive
-cd $ceres_version
-
-mkdir build && cd build
-cmake ..
-cmake --build . -j 18
-sudo checkinstall
-
 ### OpenCV
 sudo apt install liblz-dev libtiff5 libtiff5-dev libtiff-tools libwebp6
 sudo apt-get install vlc ubuntu-restricted-extras
@@ -51,7 +22,7 @@ sudo apt-get install libwebp-dev -y
 sudo apt-get install qt5-default -y
 
 sudo apt install libavcodec-dev libavformat-dev libswscale-dev libavresample-dev -y
-sudo apt install libxvidcore-dev x264 libx264-dev libfaac-dev libmp3lame-dev libtheora-dev  -y
+sudo apt install libxvidcore-dev x264 libx264-dev libfaac-dev libmp3lame-dev libtheora-dev -y
 sudo apt install libfaac-dev libmp3lame-dev libvorbis-dev -y
 sudo apt-get install libgtk-3-dev -y
 sudo -H pip3 install -U pip numpy
@@ -70,7 +41,7 @@ wget -O opencv.zip https://github.com/opencv/opencv/archive/master.zip
 wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/master.zip
 unzip opencv.zip
 unzip opencv_contrib.zip
-mkdir -p build && cd build
+mkdir -p opencv && cd opencv
 cmake \
   -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-master/modules \
   -DCMAKE_BUILD_TYPE=Release \
@@ -97,5 +68,6 @@ cmake \
   -DOPENCV_PC_FILE_NAME=opencv.pc \
   -DBUILD_EXAMPLES=ON \
   ../opencv-master
-cmake --build . -j 18
+cpu_cores="$(grep -c ^processor /proc/cpuinfo)"
+cmake --build . -j $cpu_cores
 sudo checkinstall
