@@ -77,7 +77,8 @@ cmake --build . -j8
 ### Evaluating
 
 ```shell
-./evaluate/EvaluateStaticCalibration -h   # Prints the help message. See it for the required input data.g
+./evaluate/EvaluateStaticCalibration -h   # Prints the help message.
+                                          # See it for the required input data.
 ```
 
 ### Testing
