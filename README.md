@@ -153,8 +153,6 @@ See the [README](https://github.com/Brucknem/DataAnnotationTools/blob/main/READM
 
 # Dependencies
 
-## External Dependencies
-
 | Dependency | Usage | Installation | Required | 
 | ---------- | ----------- | ------------ | -------- |
 | [Boost](https://www.boost.org/) | Command line parsing | `sudo apt install libboost-all-dev` | Yes |
