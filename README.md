@@ -159,7 +159,7 @@ See the [README](https://github.com/Brucknem/DataAnnotationTools/blob/main/READM
 | ---------- | ----------- | ------------ | -------- |
 | [Boost](https://www.boost.org/) | Command line parsing | `sudo apt install libboost-all-dev` | Yes |
 | [Ceres Solver](http://ceres-solver.org/) | Non-linear optimization | `extern/setup_ceres.sh` | Yes |
-| [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) | Rendering during evaluation | `extern/setup_opencv.sh` | `-DWITH_OPENCV=ON` |
+| [OpenCV](https://docs.opencv.org/master/d7/d9f/tutorial_linux_install.html) | Rendering during evaluation | `extern/setup_opencv.sh` <br><br> Please only run if you don't use OpenCV elsewhere. This might cause problems if you have your own OpenCV setup installed, as it compiles OpenCV with the minimal flags needed and overrides the system installation. | `-DWITH_OPENCV=ON` |
 
 ## Internal Dependencies
 
