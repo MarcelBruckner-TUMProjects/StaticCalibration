@@ -1,29 +1,5 @@
 ########################################################################################################################
-### YAML CPP ###
-########################################################################################################################
-
-# Download and unpack yaml-cpp at configure time
-configure_file(CMakeLists.txt.in yaml-cpp-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download)
-if (result)
-    message(FATAL_ERROR "CMake step for yaml-cpp failed: ${result}")
-endif ()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-download)
-if (result)
-    message(FATAL_ERROR "Build step for yaml-cpp failed: ${result}")
-endif ()
-
-# Add yaml-cpp directly to our build.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-src
-        ${CMAKE_CURRENT_BINARY_DIR}/yaml-cpp-build
-        EXCLUDE_FROM_ALL)
-
-########################################################################################################################
-### Library ###
+### Includes ###
 ########################################################################################################################
 
 if (WITH_OPENCV)
@@ -39,10 +15,11 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(Boost REQUIRED COMPONENTS program_options REQUIRED filesystem REQUIRED date_time)
 include_directories(${Boost_INCLUDE_DIRS})
 
+include_directories(${PROJECT_SOURCE_DIR}/extern)
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 ########################################################################################################################
-### Static Calibration ###
+### Library ###
 ########################################################################################################################
 
 add_library(StaticCalibration-lib
@@ -61,7 +38,7 @@ add_library(StaticCalibration-lib
 target_include_directories(StaticCalibration-lib
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
         PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-        PUBLIC "${PROJECT_BINARY_DIR}"
+        PUBLIC ${PROJECT_BINARY_DIR}
         )
 
 target_link_libraries(StaticCalibration-lib

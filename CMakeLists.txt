@@ -8,7 +8,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -pthread")
 
 option(WITH_OPENCV "Compile with Open CV for rendering." OFF)
 option(WITH_TESTS "Compile with tests." OFF)
-option(WITH_COVERAGE "Compile with coverage." OFF)
+#option(WITH_COVERAGE "Compile with coverage." OFF)
 
 configure_file(CMakeConfig.h.in CMakeConfig.h)
 
@@ -22,6 +22,11 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMakeModules)
 #    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 #    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0")
 #endif ()
+
+########################################################################################################################
+### External Dependencies ###
+########################################################################################################################
+add_subdirectory(extern)
 
 ########################################################################################################################
 ### Standalone App ###
