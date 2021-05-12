@@ -77,7 +77,7 @@ cmake --build . -j8
 ### Evaluating
 
 ```shell
-./evaluate/EvaluateStaticCalibration -h 
+./evaluate/EvaluateStaticCalibration -h   # Prints the help message. See it for the required input data.g
 ```
 
 ### Testing
@@ -85,6 +85,66 @@ cmake --build . -j8
 ```shell
 ctest --verbose
 ```
+
+***
+
+# Input Data
+
+The calibration requires a 2D-3D mapping from pixels to objects to estimate the 6DoF pose of the camera.
+
+### Objects
+
+```shell
+-o [ --objects_file ] <filename>
+```
+
+The `objects_file` is required to be in the YAML format as specified:
+
+```yaml
+objects:
+  - # Must match with the ids in the pixel file. This establishes the mapping.
+    id: 4008327
+    # Has to be pole. No other type is currently implemented.
+    type: pole
+    # Has to be permanentDelineator. No other name is currently implemented.
+    name: permanentDelineator
+    # [XYZ | East/North/Height] coordinates in a right-handed coordinate system. 
+    utm_coord: [ 692571.92953127041, 5339110.7990111383, 549.29530761491162 ]
+    # The height in the same coordinate system as in utm_coord.
+    height: 1.135
+  - …
+```
+
+To facilitate the creation of the `objects_file`, we have released an [OpenDRIVE](https://github.com/Brucknem/OpenDRIVE)
+parser that converts from the OpenDRIVE V1.4 standard to our internally used format.  
+See the [README](https://github.com/Brucknem/OpenDRIVE/blob/main/README.md) in the project for the usage.
+
+### Pixels
+
+```shell
+-p [ --pixels_file ] <filename>
+```
+
+The `pixels_file` is required to be in the YAML format as specified:
+
+```yaml
+- # Must match with the ids in the objects_file. This establishes the mapping.
+  id: 4008327
+  # The UV pixel coordinates of the object.
+  pixels:
+    - [ 13, 373 ]
+    - [ 13, 374 ]
+    - [ 14, 374 ]
+    - [ 13, 375 ]
+    - [ 14, 375 ]
+    - …
+- …
+```
+
+To facilitate the creation of the `pixels_file`, we have released
+an [Annotation Tool](https://github.com/Brucknem/DataAnnotationTools)
+that can be used to mark pixels in a frame and outputs them in the required format.  
+See the [README](https://github.com/Brucknem/DataAnnotationTools/blob/main/README.md) in the project for the usage.
 
 ***
 
