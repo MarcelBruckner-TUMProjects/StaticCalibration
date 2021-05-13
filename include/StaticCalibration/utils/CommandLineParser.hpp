@@ -14,7 +14,7 @@
 #include <boost/program_options.hpp>
 
 namespace static_calibration {
-    namespace app {
+    namespace utils {
 
         /**
          * Parser result wrapping the options for further usage.

@@ -93,7 +93,7 @@ void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
 /** main */
 int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
-    auto parsedOptions = static_calibration::app::parseCommandLine(argc, argv);
+    auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
     auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile,
                                                                 parsedOptions.imageSize);

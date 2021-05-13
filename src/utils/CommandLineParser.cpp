@@ -14,18 +14,18 @@
 
 
 namespace static_calibration {
-    namespace app {
+    namespace utils {
 
-#define OBJECTS_FILE_OPTION_NAME std::string("objects_file")
-#define PIXELS_FILE_OPTION_NAME std::string("pixels_file")
-#define EVALUATION_BACKGROUND_FRAME_OPTION_NAME std::string("evaluation_background_frame")
-#define EVALUATION_RUNS_OPTION_NAME std::string("evaluation_runs")
-#define FOCAL_LENGTH_OPTION_NAME std::string("focal_length")
-#define FOCAL_LENGTH_RATIO_OPTION_NAME std::string("focal_length_ratio")
-#define IMAGE_SIZE_OPTION_NAME std::string("image_size")
-#define PRINCIPAL_POINT_OPTION_NAME std::string("principal_point")
-#define SKEW_OPTION_NAME std::string("skew")
-#define LOG_ESTIMATION_PROGRESS_OPTION_NAME std::string("log")
+        const char *OBJECTS_FILE_OPTION_NAME = "objects_file";
+        const char *PIXELS_FILE_OPTION_NAME = "pixels_file";
+        const char *EVALUATION_BACKGROUND_FRAME_OPTION_NAME = "evaluation_background_frame";
+        const char *EVALUATION_RUNS_OPTION_NAME = "evaluation_runs";
+        const char *FOCAL_LENGTH_OPTION_NAME = "focal_length";
+        const char *FOCAL_LENGTH_RATIO_OPTION_NAME = "focal_length_ratio";
+        const char *IMAGE_SIZE_OPTION_NAME = "image_size";
+        const char *PRINCIPAL_POINT_OPTION_NAME = "principal_point";
+        const char *SKEW_OPTION_NAME = "skew";
+        const char *LOG_ESTIMATION_PROGRESS_OPTION_NAME = "log";
 
         bool logEstimationProgress = false;
 
@@ -36,14 +36,14 @@ namespace static_calibration {
                     ("help,h", "Produce this help message.");
 
             desc.add_options()
-                    ((OBJECTS_FILE_OPTION_NAME + ",o").c_str(),
+                    ((std::string(OBJECTS_FILE_OPTION_NAME) + ",o").c_str(),
                      boost::program_options::value<std::string>()->default_value("../misc/objects.yaml"),
                      "The path to the file including the world objects. The path can be relative or absolute. "
                      "To create the objects file from an OpenDRIVE HD map visit: \n"
                      "https://github.com/Brucknem/OpenDRIVE");
 
             desc.add_options()
-                    ((PIXELS_FILE_OPTION_NAME + ",p").c_str(),
+                    ((std::string(PIXELS_FILE_OPTION_NAME) + ",p").c_str(),
                      boost::program_options::value<std::string>()->default_value("../misc/pixels.yaml"),
                      "The path to the file including the marked pixels. The path can be relative or absolute. "
                      "To create the pixels file from a keyframe extracted from a video visit: \n"
@@ -51,7 +51,7 @@ namespace static_calibration {
 
 #ifdef WITH_OPENCV
             desc.add_options()
-                    ((EVALUATION_BACKGROUND_FRAME_OPTION_NAME + ",e").c_str(),
+                    ((std::string(EVALUATION_BACKGROUND_FRAME_OPTION_NAME) + ",e").c_str(),
                      boost::program_options::value<std::string>()->default_value("../misc/test_frame.png"),
                      "The path to the file containing the background frame used for rendering during evaluation."
                      " The path can be relative or absolute."
@@ -60,44 +60,45 @@ namespace static_calibration {
 
 #ifndef WITH_COVERAGE
             desc.add_options()
-                    ((EVALUATION_RUNS_OPTION_NAME + ",n").c_str(),
+                    ((std::string(EVALUATION_RUNS_OPTION_NAME) + ",n").c_str(),
                      boost::program_options::value<int>()->default_value(1000000),
                      "The number of runs performed during evaluation.");
 #endif //WITH_COVERAGE
 
             desc.add_options()
-                    ((IMAGE_SIZE_OPTION_NAME + ",i").c_str(),
+                    ((std::string(IMAGE_SIZE_OPTION_NAME) + ",i").c_str(),
                      boost::program_options::value<std::string>()->default_value("1920,1200"),
                      "The size of the image.\n"
                      "OpenCV flips images when rendering along the X axis. "
                      "We thus need the image size to flip the pixels during estimation.");
 
             desc.add_options()
-                    ((FOCAL_LENGTH_OPTION_NAME + ",f").c_str(),
+                    ((std::string(FOCAL_LENGTH_OPTION_NAME) + ",f").c_str(),
                      boost::program_options::value<double>()->default_value(9000),
                      "The focal length of the camera in pixels. "
                      "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
 
             desc.add_options()
-                    ((FOCAL_LENGTH_RATIO_OPTION_NAME + ",r").c_str(),
+                    ((std::string(FOCAL_LENGTH_RATIO_OPTION_NAME) + ",r").c_str(),
                      boost::program_options::value<double>()->default_value(1),
                      "The ratio of the focal length of the X axis to the focal length of the Y axis of the camera."
                      "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
 
             desc.add_options()
-                    ((PRINCIPAL_POINT_OPTION_NAME + ",u").c_str(),
+                    ((std::string(PRINCIPAL_POINT_OPTION_NAME) + ",u").c_str(),
                      boost::program_options::value<std::string>()->default_value("960,600"),
                      "The principal point of the camera in pixels. "
                      "Please provide the values as a comma separated tuple of: \"principal_X, principal_Y\".\n"
                      "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
 
             desc.add_options()
-                    ((SKEW_OPTION_NAME + ",s").c_str(), boost::program_options::value<double>()->default_value(1),
+                    ((std::string(SKEW_OPTION_NAME) + ",s").c_str(),
+                     boost::program_options::value<double>()->default_value(1),
                      "The skew of the camera.\n"
                      "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
 
             desc.add_options()
-                    ((LOG_ESTIMATION_PROGRESS_OPTION_NAME + ",l").c_str(),
+                    ((std::string(LOG_ESTIMATION_PROGRESS_OPTION_NAME) + ",l").c_str(),
                      boost::program_options::bool_switch(&logEstimationProgress),
                      "Flag if the progress of the estimation should be logged to STDOUT.");
             return desc;
