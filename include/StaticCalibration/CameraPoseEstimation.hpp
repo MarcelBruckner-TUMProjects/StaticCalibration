@@ -10,6 +10,7 @@
 #include <iostream>
 #include <thread>
 #include <limits>
+#include "yaml-cpp/yaml.h"
 
 #include "ceres/ceres.h"
 #include "glog/logging.h"
@@ -536,6 +537,8 @@ namespace static_calibration {
             void addIntrinsicsConstraints(ceres::Problem &problem);
 
             void resetParameters();
+
+            std::string toYAML() const;
         };
     }
 }

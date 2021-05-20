@@ -32,6 +32,11 @@ namespace static_calibration {
             std::string pixelsFile;
 
             /**
+             * The path to the file to which the resulting calibration parameters are written.
+             */
+            std::string calibrationParamsFile;
+
+            /**
              * The path to the background image rendered during evaluation.
              */
             std::string evaluationBackgroundFrame;

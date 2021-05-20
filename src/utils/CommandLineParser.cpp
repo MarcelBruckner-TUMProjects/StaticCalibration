@@ -26,6 +26,7 @@ namespace static_calibration {
         const char *PRINCIPAL_POINT_OPTION_NAME = "principal_point";
         const char *SKEW_OPTION_NAME = "skew";
         const char *LOG_ESTIMATION_PROGRESS_OPTION_NAME = "log";
+        const char *CALIBRATION_FILE_NAME_OPTION_NAME = "calibration_params_file";
 
         bool logEstimationProgress = false;
 
@@ -39,6 +40,7 @@ namespace static_calibration {
                     ((std::string(OBJECTS_FILE_OPTION_NAME) + ",o").c_str(),
                      boost::program_options::value<std::string>()->default_value("../misc/objects.yaml"),
                      "The path to the file including the world objects. The path can be relative or absolute. "
+                     "The objects need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height. "
                      "To create the objects file from an OpenDRIVE HD map visit: \n"
                      "https://github.com/Brucknem/OpenDRIVE");
 
@@ -48,6 +50,12 @@ namespace static_calibration {
                      "The path to the file including the marked pixels. The path can be relative or absolute. "
                      "To create the pixels file from a keyframe extracted from a video visit: \n"
                      "https://github.com/Brucknem/DataAnnotationTools");
+
+            desc.add_options()
+                    ((std::string(CALIBRATION_FILE_NAME_OPTION_NAME) + ",c").c_str(),
+                     boost::program_options::value<std::string>()->default_value("calibration_params.yaml"),
+                     "The path to the file to which the resulting calibration parameters are written. "
+                     "The path can be relative or absolute.");
 
 #ifdef WITH_OPENCV
             desc.add_options()
@@ -147,6 +155,7 @@ namespace static_calibration {
             ParsedOptions parsedOptions{
                     variables_map[OBJECTS_FILE_OPTION_NAME].as<std::string>(),
                     variables_map[PIXELS_FILE_OPTION_NAME].as<std::string>(),
+                    variables_map[CALIBRATION_FILE_NAME_OPTION_NAME].as<std::string>(),
                     evaluationBackgroundFrame,
                     evaluationRuns,
                     parseVectorValue(variables_map[IMAGE_SIZE_OPTION_NAME].as<std::string>()).cast<int>(),
