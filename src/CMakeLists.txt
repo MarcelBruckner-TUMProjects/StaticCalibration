@@ -33,6 +33,7 @@ add_library(StaticCalibration-lib
         objects/ObjectsLoading.cpp
         objects/YAMLExtension.cpp
         utils/CommandLineParser.cpp
+        utils/Formatters.cpp
         )
 
 target_include_directories(StaticCalibration-lib
@@ -45,6 +46,7 @@ target_link_libraries(StaticCalibration-lib
         Eigen3::Eigen
         Ceres::ceres
         yaml-cpp
+        tinyxml2
         ${Boost_LIBRARIES}
         ${EXTRA_LIBS}
         )

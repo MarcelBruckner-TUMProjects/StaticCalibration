@@ -172,4 +172,5 @@ These dependencies are pulled by CMake when the project is built. You `do not` h
 | Dependency | Usage | Required | 
 | ---------- | ----------- | -------- |
 | [YAML-CPP](https://github.com/jbeder/yaml-cpp.git) | YAML parser for objects and pixels | Yes |
+| [TinyXML2](https://github.com/leethomason/tinyxml2) | XML parser & writer for conversion to ROS node | Yes |
 | [GoogleTest](https://github.com/google/googletest) | Google unit testing framework | `-DWITH_TESTS=ON` |

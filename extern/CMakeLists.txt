@@ -3,3 +3,4 @@ if (WITH_TESTS)
 endif ()
 
 add_subdirectory(yaml-cpp)
+add_subdirectory(tinyxml2)

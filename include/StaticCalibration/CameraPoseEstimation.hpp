@@ -11,6 +11,7 @@
 #include <thread>
 #include <limits>
 #include "yaml-cpp/yaml.h"
+#include "tinyxml2.h"
 
 #include "ceres/ceres.h"
 #include "glog/logging.h"
@@ -538,7 +539,6 @@ namespace static_calibration {
 
             void resetParameters();
 
-            std::string toYAML() const;
         };
     }
 }

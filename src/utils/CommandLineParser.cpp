@@ -22,11 +22,11 @@ namespace static_calibration {
         const char *EVALUATION_RUNS_OPTION_NAME = "evaluation_runs";
         const char *FOCAL_LENGTH_OPTION_NAME = "focal_length";
         const char *FOCAL_LENGTH_RATIO_OPTION_NAME = "focal_length_ratio";
-        const char *IMAGE_SIZE_OPTION_NAME = "image_size";
         const char *PRINCIPAL_POINT_OPTION_NAME = "principal_point";
         const char *SKEW_OPTION_NAME = "skew";
         const char *LOG_ESTIMATION_PROGRESS_OPTION_NAME = "log";
-        const char *CALIBRATION_FILE_NAME_OPTION_NAME = "calibration_params_file";
+        const char *CAMERA_NAME_OPTION_NAME = "camera_name";
+        const char *MEASUREMENT_POINT_OPTION_NAME = "measurement_point";
 
         bool logEstimationProgress = false;
 
@@ -52,10 +52,14 @@ namespace static_calibration {
                      "https://github.com/Brucknem/DataAnnotationTools");
 
             desc.add_options()
-                    ((std::string(CALIBRATION_FILE_NAME_OPTION_NAME) + ",c").c_str(),
-                     boost::program_options::value<std::string>()->default_value("calibration_params.yaml"),
-                     "The path to the file to which the resulting calibration parameters are written. "
-                     "The path can be relative or absolute.");
+                    ((std::string(MEASUREMENT_POINT_OPTION_NAME) + ",m").c_str(),
+                     boost::program_options::value<std::string>()->default_value("s40"),
+                     "The name of the measurement point (the gantry bridge)");
+
+            desc.add_options()
+                    ((std::string(CAMERA_NAME_OPTION_NAME) + ",c").c_str(),
+                     boost::program_options::value<std::string>()->default_value("s_cam_far"),
+                     "The name of the camera at the given measurement point.");
 
 #ifdef WITH_OPENCV
             desc.add_options()
@@ -72,13 +76,6 @@ namespace static_calibration {
                      boost::program_options::value<int>()->default_value(1000000),
                      "The number of runs performed during evaluation.");
 #endif //WITH_COVERAGE
-
-            desc.add_options()
-                    ((std::string(IMAGE_SIZE_OPTION_NAME) + ",i").c_str(),
-                     boost::program_options::value<std::string>()->default_value("1920,1200"),
-                     "The size of the image.\n"
-                     "OpenCV flips images when rendering along the X axis. "
-                     "We thus need the image size to flip the pixels during estimation.");
 
             desc.add_options()
                     ((std::string(FOCAL_LENGTH_OPTION_NAME) + ",f").c_str(),
@@ -155,10 +152,10 @@ namespace static_calibration {
             ParsedOptions parsedOptions{
                     variables_map[OBJECTS_FILE_OPTION_NAME].as<std::string>(),
                     variables_map[PIXELS_FILE_OPTION_NAME].as<std::string>(),
-                    variables_map[CALIBRATION_FILE_NAME_OPTION_NAME].as<std::string>(),
+                    variables_map[MEASUREMENT_POINT_OPTION_NAME].as<std::string>(),
+                    variables_map[CAMERA_NAME_OPTION_NAME].as<std::string>(),
                     evaluationBackgroundFrame,
                     evaluationRuns,
-                    parseVectorValue(variables_map[IMAGE_SIZE_OPTION_NAME].as<std::string>()).cast<int>(),
                     variables_map[FOCAL_LENGTH_OPTION_NAME].as<double>(),
                     variables_map[FOCAL_LENGTH_RATIO_OPTION_NAME].as<double>(),
                     parseVectorValue(variables_map[PRINCIPAL_POINT_OPTION_NAME].as<std::string>()),

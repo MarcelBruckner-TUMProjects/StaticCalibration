@@ -240,20 +240,23 @@ namespace static_calibration {
         }
 
         void CameraPoseEstimation::addIntrinsicsConstraints(ceres::Problem &problem) {
-            double scale = 0;
             if (intrinsicsFixed) {
-                scale = 1e52;
+                intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
+                        static_calibration::calibration::residuals::DistanceResidual::create(
+                                initialIntrinsics[0]
+                        ),
+                        getScaledHuberLoss(1e52),
+                        &intrinsics[0]
+                ));
+            } else {
+                intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
+                        static_calibration::calibration::residuals::DistanceFromIntervalResidual::create(
+                                0, initialIntrinsics[0] * 2
+                        ),
+                        getScaledHuberLoss(1e52),
+                        &intrinsics[0]
+                ));
             }
-
-            intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
-
-                    static_calibration::calibration::residuals::DistanceResidual::create(
-                            initialIntrinsics[0]
-                    ),
-                    getScaledHuberLoss(scale),
-                    &intrinsics[0]
-            ));
-
             intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
                     static_calibration::calibration::residuals::DistanceResidual::create(
                             initialIntrinsics[1]
@@ -327,8 +330,8 @@ namespace static_calibration {
 
             os << "Rotation:" << std::endl;
             os << "From:       " << printVectorRow(estimator.initialRotation) << std::endl;
-            os << "To:         " << printVectorRow(estimator.rotation) << std::endl;
-            os << "Difference: " << printVectorRow(estimator.rotation - estimator.initialRotation) << std::endl;
+            os << "To:         " << printVectorRow(estimator.getRotation()) << std::endl;
+            os << "Difference: " << printVectorRow(estimator.getRotation() - estimator.initialRotation) << std::endl;
 
 
             os << "Intrinsics:" << std::endl;
@@ -453,29 +456,6 @@ namespace static_calibration {
             return intrinsicsLoss;
         }
 
-        std::string CameraPoseEstimation::toYAML() const {
-            YAML::Emitter out;
-            out << YAML::BeginMap;
-
-            out << YAML::Key << "translation";
-            out << YAML::Comment("east, north, height");
-            out << YAML::Value << YAML::BeginSeq;
-            out << YAML::Value << translation.x() << translation.y() << translation.z();
-            out << YAML::EndSeq;
-
-            out << YAML::Key << "rotation";
-            out << YAML::Comment("west-east axis, south-north axis, zero-height axis");
-            out << YAML::Value << YAML::BeginSeq;
-            out << YAML::Value << rotation.x() << rotation.y() << rotation.z();
-            out << YAML::EndSeq;
-
-            out << YAML::Key << "intrinsics";
-            out << YAML::Comment("f_x, ratio, c_x, c_y, skew");
-            out << YAML::Value << intrinsics;
-
-            out << YAML::EndMap;
-            return out.c_str();
-        }
 
         std::string printVectorRow(std::vector<double> vector) {
             std::stringstream ss;
@@ -489,6 +469,7 @@ namespace static_calibration {
 
         std::string printVectorRow(Eigen::Vector3d vector) {
             std::stringstream ss;
+            ss << std::fixed;
             ss << "[" << vector.x() << ", " << vector.y() << ", " << vector.z() << "]";
             return ss.str();
         }

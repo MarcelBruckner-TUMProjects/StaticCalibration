@@ -32,9 +32,14 @@ namespace static_calibration {
             std::string pixelsFile;
 
             /**
-             * The path to the file to which the resulting calibration parameters are written.
+             * The name of the measurement point, e.g. s50.
              */
-            std::string calibrationParamsFile;
+            std::string measurementPointName;
+
+            /**
+             * The name of the camera at the measurement point, e.g. s_cam_near.
+             */
+            std::string cameraName;
 
             /**
              * The path to the background image rendered during evaluation.
@@ -45,11 +50,6 @@ namespace static_calibration {
              * The number of evaluation runs.
              */
             int evaluationRuns;
-
-            /**
-             * The size in pixels of the camera frame output.
-             */
-            Eigen::Vector2i imageSize;
 
             /**
              * The focal length in pixels of the camera according to the pinhole camera model.

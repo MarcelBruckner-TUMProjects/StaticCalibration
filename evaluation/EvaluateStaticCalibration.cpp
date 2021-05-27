@@ -95,13 +95,13 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-    auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile,
-                                                                parsedOptions.imageSize);
+    auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile);
     google::InitGoogleLogging("Static Calibration");
     static_calibration::calibration::CameraPoseEstimation estimator;
     estimator.guessIntrinsics(parsedOptions.focalLength, parsedOptions.focalLengthRatio,
                               parsedOptions.principalPoint,
                               parsedOptions.skew);
+//    estimator.fixIntrinsics(true);
     auto csvWriter = initCSVWriters();
 
 #ifdef WITH_OPENCV
