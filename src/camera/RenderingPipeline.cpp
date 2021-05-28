@@ -47,7 +47,7 @@ namespace static_calibration {
 
             bool internalFlipped;
             Eigen::Matrix<T, 2, 1> pixel = perspectiveDivision(homogeneousPixel, internalFlipped);
-//			std::cout << "Pixel" << std::endl << pixel << std::endl;
+//            std::cout << "Pixel" << std::endl << pixel << std::endl;
             flipped = internalFlipped || invalid;
             return pixel;
         }
@@ -117,59 +117,61 @@ namespace static_calibration {
         }
 
 #ifdef WITH_OPENCV
+
         Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                                               const std::vector<double> &intrinsics,
-                                               const Eigen::Vector4d &vector,
-                                               const cv::Vec3d &color, cv::Mat &image) {
-                bool flipped;
-                return render(translation, rotation, intrinsics, vector, color, image, flipped);
-            }
+                                           const std::vector<double> &intrinsics,
+                                           const Eigen::Vector4d &vector,
+                                           const cv::Vec3d &color, cv::Mat &image) {
+            bool flipped;
+            return render(translation, rotation, intrinsics, vector, color, image, flipped);
+        }
 
-            Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                                               const std::vector<double> &intrinsics,
-                                               const Eigen::Vector4d &vector,
-                                               const cv::Vec3d &color, cv::Mat &image, bool &flipped) {
-                Eigen::Vector2i imageSize(image.cols, image.rows);
+        Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                                           const std::vector<double> &intrinsics,
+                                           const Eigen::Vector4d &vector,
+                                           const cv::Vec3d &color, cv::Mat &image, bool &flipped) {
+            Eigen::Vector2i imageSize(image.cols, image.rows);
 
-                Eigen::Vector2d pointInImageSpace = render(
+            Eigen::Vector2d pointInImageSpace = render(
                     translation.data(), rotation.data(), intrinsics.data(),
                     vector.data(), flipped);
 
-                if (flipped) {
-                    return pointInImageSpace;
-                }
-                int imageHeight = imageSize.y() - 1;
-
-                for (int i = 0; i < 2; ++i) {
-                    for (int j = 0; j < 2; ++j) {
-                        Eigen::Vector2i nearestPixel = pointInImageSpace.cast<int>();
-                        nearestPixel.x() += i;
-                        nearestPixel.y() += j;
-                        double distance = (nearestPixel.cast<double>() - pointInImageSpace).norm();
-                        nearestPixel.y() = imageHeight - nearestPixel.y();
-
-    //					std::cout << "[" << nearestPixel.x() << ", " << nearestPixel.y() << "] - " << distance;
-                        if (nearestPixel.x() >= imageSize.x() || nearestPixel.y() >= imageSize.y() ||
-                            nearestPixel.x() < 0 || nearestPixel.y() < 0) {
-                            continue;
-                        }
-    //					std::cout << std::endl;
-
-                        cv::Vec4d colorCV = {color[0], color[1], color[2], (distance / (double) sqrt(2))};
-
-                        // 1200, 1920
-                        image.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = colorCV;
-                    }
-                }
-
-                cv::circle(image,
-                           {(int) pointInImageSpace.x(), (int) (imageHeight - pointInImageSpace.y())},
-                           std::min(5, std::max(0, (int) (imageSize.y() * 0.01))),
-                           color,
-                           cv::FILLED
-                );
+            if (flipped) {
                 return pointInImageSpace;
             }
+            int imageHeight = imageSize.y() - 1;
+
+            for (int i = 0; i < 2; ++i) {
+                for (int j = 0; j < 2; ++j) {
+                    Eigen::Vector2i nearestPixel = pointInImageSpace.cast<int>();
+                    nearestPixel.x() += i;
+                    nearestPixel.y() += j;
+                    double distance = (nearestPixel.cast<double>() - pointInImageSpace).norm();
+                    nearestPixel.y() = imageHeight - nearestPixel.y();
+
+                    //					std::cout << "[" << nearestPixel.x() << ", " << nearestPixel.y() << "] - " << distance;
+                    if (nearestPixel.x() >= imageSize.x() || nearestPixel.y() >= imageSize.y() ||
+                        nearestPixel.x() < 0 || nearestPixel.y() < 0) {
+                        continue;
+                    }
+                    //					std::cout << std::endl;
+
+                    cv::Vec4d colorCV = {color[0], color[1], color[2], (distance / (double) sqrt(2))};
+
+                    // 1200, 1920
+                    image.at<cv::Vec4d>(nearestPixel.y(), nearestPixel.x()) = colorCV;
+                }
+            }
+
+            cv::circle(image,
+                       {(int) pointInImageSpace.x(), (int) (imageHeight - pointInImageSpace.y())},
+                       std::min(5, std::max(0, (int) (imageSize.y() * 0.01))),
+                       color,
+                       cv::FILLED
+            );
+            return pointInImageSpace;
+        }
+
 #endif //WITH_OPENCV
 
         template<typename T>
@@ -190,7 +192,7 @@ namespace static_calibration {
             invalid = false;
             return getIntrinsicsMatrixFromConfig(new T[9]{
                     intrinsics[0], zero, intrinsics[2],
-                    zero, intrinsics[0] * intrinsics[1], intrinsics[3],
+                    zero, intrinsics[1], intrinsics[3],
 //				zero, intrinsics[4], (T) 1
                     zero, zero, (T) 1
             });
@@ -204,7 +206,6 @@ namespace static_calibration {
         template<typename T>
         std::vector<T> getIntrinsicsFromRealSensor(const T *intrinsics) {
             T zero = (T) 0;
-            T focalLength = intrinsics[0];
 
             Eigen::Matrix<T, 2, 1> principalPoint = Eigen::Matrix<T, 2, 1>(
                     intrinsics[3],
@@ -213,12 +214,13 @@ namespace static_calibration {
 
             T skew = intrinsics[5];
 
-            T alpha = focalLength * (T) 1. / intrinsics[1];
+            T focalLengthPXX = intrinsics[0] * (T) 1. / intrinsics[2];
+            T focalLengthPXY = intrinsics[1] * (T) 1. / intrinsics[2];
 
             return
                     std::vector<T>
                             {
-                                    alpha, intrinsics[2], principalPoint(0, 0), principalPoint(1, 0), skew
+                                    focalLengthPXX, focalLengthPXY, principalPoint(0, 0), principalPoint(1, 0), skew
                             };
         }
 
@@ -235,7 +237,7 @@ namespace static_calibration {
                    intrinsics[0], intrinsics[1], intrinsics[2], zero,
                     intrinsics[3], intrinsics[4], intrinsics[5], zero,
                     intrinsics[6], intrinsics[7], intrinsics[8], zero;
-//			std::cout << matrix << std::endl;
+//            std::cout << matrix << std::endl;
             return matrix;
         }
 
@@ -249,14 +251,14 @@ namespace static_calibration {
             double principalX = 1920. / 2;
             double principalY = 1200. / 2;
             std::vector<double> intrinsics{
-                    20, pixelWidth, 1, principalX, principalY, 0
+                    20, 20, pixelWidth, principalX, principalY, 0
             };
             return getIntrinsicsFromRealSensor(intrinsics.data());
         }
 
         std::vector<double> getS40NCamFarIntrinsics() {
             return std::vector<double>{
-                    9023.482825, 1., 1222.314303, 557.541182, 0.000000
+                    9023.482825, 9023.482825, 1222.314303, 557.541182, 0.000000
             };
         }
 

@@ -21,8 +21,7 @@ int main(int argc, char const *argv[]) {
 
     static_calibration::calibration::CameraPoseEstimation estimator;
     estimator.addWorldObjects(objects);
-    estimator.guessIntrinsics(parsedOptions.focalLength, parsedOptions.focalLengthRatio, parsedOptions.principalPoint,
-                              parsedOptions.skew);
+    estimator.guessIntrinsics(parsedOptions.intrinsics);
 //    estimator.fixIntrinsics(true);
 
     google::InitGoogleLogging("Static Calibration");

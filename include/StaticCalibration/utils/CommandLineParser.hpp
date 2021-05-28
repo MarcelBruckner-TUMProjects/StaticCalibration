@@ -52,24 +52,9 @@ namespace static_calibration {
             int evaluationRuns;
 
             /**
-             * The focal length in pixels of the camera according to the pinhole camera model.
+             * The intrinsic parameters of the camera according to the pinhole camera model.
              */
-            double focalLength;
-
-            /**
-             * The ratio of the focal length of the X axis to the focal length of the Y axis of the camera according to the pinhole camera model.
-             */
-            double focalLengthRatio;
-
-            /**
-             * The principal point in pixels of the camera according to the pinhole camera model.
-             */
-            Eigen::Vector2d principalPoint;
-
-            /**
-             * The skew of the camera according to the pinhole camera model.
-             */
-            double skew;
+            std::vector<double> intrinsics;
 
             /**
              * Flag if the progress of the ceres optimizer should be logged.
@@ -83,16 +68,6 @@ namespace static_calibration {
          * @return The command line options description wrapper.
          */
         boost::program_options::options_description createOptionsDescription();
-
-        /**
-         * Parses a string containing a comma separated tuple of values.
-         * Prints a help text and stops execution if the tuple does not consist of exactly 2 numeric values.
-         *
-         * @param input The string to parse.
-         *
-         * @return The parsed tuple.
-         */
-        Eigen::Vector2d parseVectorValue(const std::string &input);
 
         /**
          * Parses the command line options.

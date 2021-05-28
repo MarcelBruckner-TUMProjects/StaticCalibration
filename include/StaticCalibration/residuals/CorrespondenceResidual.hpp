@@ -58,8 +58,8 @@ namespace static_calibration {
                  */
                 template<typename T>
                 bool operator()(
-                        const T *fx,
-                        const T *cx,
+                        const T *f_x,
+                        const T *f_y,
                         const T *fy,
                         const T *cy,
                         const T *skew,

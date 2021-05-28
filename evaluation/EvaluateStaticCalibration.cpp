@@ -98,9 +98,7 @@ int main(int argc, char const *argv[]) {
     auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile);
     google::InitGoogleLogging("Static Calibration");
     static_calibration::calibration::CameraPoseEstimation estimator;
-    estimator.guessIntrinsics(parsedOptions.focalLength, parsedOptions.focalLengthRatio,
-                              parsedOptions.principalPoint,
-                              parsedOptions.skew);
+    estimator.guessIntrinsics(parsedOptions.intrinsics);
 //    estimator.fixIntrinsics(true);
     auto csvWriter = initCSVWriters();
 
@@ -137,9 +135,8 @@ int main(int argc, char const *argv[]) {
             run++;
             estimator.clearWorldObjects();
             estimator.addWorldObjects(objects);
-            estimator.guessIntrinsics(parsedOptions.focalLength, parsedOptions.focalLengthRatio,
-                                      parsedOptions.principalPoint,
-                                      parsedOptions.skew);
+            estimator.guessIntrinsics(parsedOptions.intrinsics);
+
 #ifdef WITH_OPENCV
             estimator.estimateAsync(parsedOptions.logEstimationProgress);
 #else //WITH_OPENCV

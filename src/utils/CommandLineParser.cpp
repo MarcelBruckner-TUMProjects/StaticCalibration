@@ -20,10 +20,7 @@ namespace static_calibration {
         const char *PIXELS_FILE_OPTION_NAME = "pixels_file";
         const char *EVALUATION_BACKGROUND_FRAME_OPTION_NAME = "evaluation_background_frame";
         const char *EVALUATION_RUNS_OPTION_NAME = "evaluation_runs";
-        const char *FOCAL_LENGTH_OPTION_NAME = "focal_length";
-        const char *FOCAL_LENGTH_RATIO_OPTION_NAME = "focal_length_ratio";
-        const char *PRINCIPAL_POINT_OPTION_NAME = "principal_point";
-        const char *SKEW_OPTION_NAME = "skew";
+        const char *INTRINSICS_OPTION_NAME = "intrinsics";
         const char *LOG_ESTIMATION_PROGRESS_OPTION_NAME = "log";
         const char *CAMERA_NAME_OPTION_NAME = "camera_name";
         const char *MEASUREMENT_POINT_OPTION_NAME = "measurement_point";
@@ -78,28 +75,11 @@ namespace static_calibration {
 #endif //WITH_COVERAGE
 
             desc.add_options()
-                    ((std::string(FOCAL_LENGTH_OPTION_NAME) + ",f").c_str(),
-                     boost::program_options::value<double>()->default_value(9000),
-                     "The focal length of the camera in pixels. "
-                     "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
-
-            desc.add_options()
-                    ((std::string(FOCAL_LENGTH_RATIO_OPTION_NAME) + ",r").c_str(),
-                     boost::program_options::value<double>()->default_value(1),
-                     "The ratio of the focal length of the X axis to the focal length of the Y axis of the camera."
-                     "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
-
-            desc.add_options()
-                    ((std::string(PRINCIPAL_POINT_OPTION_NAME) + ",u").c_str(),
-                     boost::program_options::value<std::string>()->default_value("960,600"),
-                     "The principal point of the camera in pixels. "
-                     "Please provide the values as a comma separated tuple of: \"principal_X, principal_Y\".\n"
-                     "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
-
-            desc.add_options()
-                    ((std::string(SKEW_OPTION_NAME) + ",s").c_str(),
-                     boost::program_options::value<double>()->default_value(1),
-                     "The skew of the camera.\n"
+                    ((std::string(INTRINSICS_OPTION_NAME) + ",i").c_str(),
+                     boost::program_options::value<std::vector<double>>()->multitoken(),
+                     "The intrinsic parameters of the pinhole camera model. "
+                     "Provide the parameters as space separated list of values: focal_x focal_y principal_x principal_y [skew (optional, defaults to 0)]. "
+                     "All parameters need to be in pixels (except for skew). "
                      "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
 
             desc.add_options()
@@ -107,21 +87,6 @@ namespace static_calibration {
                      boost::program_options::bool_switch(&logEstimationProgress),
                      "Flag if the progress of the estimation should be logged to STDOUT.");
             return desc;
-        }
-
-        Eigen::Vector2d parseVectorValue(const std::string &input) {
-            std::vector<std::string> parserBuffer;
-            std::vector<double> parsedValuesBuffer;
-            boost::split(parserBuffer, input, [](char c) { return c == ','; });
-            if (parserBuffer.size() != 2) {
-                std::cout << "Provide intrinsics as comma separated tuple. "
-                             "See the help for more information about the usage.";
-                exit(EXIT_FAILURE);
-            }
-            BOOST_FOREACH(std::string value, parserBuffer) {
-                            parsedValuesBuffer.emplace_back(boost::lexical_cast<double>(boost::trim_copy(value)));
-                        }
-            return Eigen::Vector2d{parsedValuesBuffer[0], parsedValuesBuffer[1]};
         }
 
         ParsedOptions parseCommandLine(int argc, const char **argv) {
@@ -156,10 +121,7 @@ namespace static_calibration {
                     variables_map[CAMERA_NAME_OPTION_NAME].as<std::string>(),
                     evaluationBackgroundFrame,
                     evaluationRuns,
-                    variables_map[FOCAL_LENGTH_OPTION_NAME].as<double>(),
-                    variables_map[FOCAL_LENGTH_RATIO_OPTION_NAME].as<double>(),
-                    parseVectorValue(variables_map[PRINCIPAL_POINT_OPTION_NAME].as<std::string>()),
-                    variables_map[SKEW_OPTION_NAME].as<double>(),
+                    variables_map[INTRINSICS_OPTION_NAME].as<std::vector<double>>(),
                     logEstimationProgress
             };
 

@@ -435,7 +435,7 @@ namespace static_calibration {
             void guessIntrinsics(const std::vector<double> &intrinsics);
 
             void
-            guessIntrinsics(double focalLength, double focalLengthRatio, const Eigen::Vector2d &principalPoint,
+            guessIntrinsics(double focalLengthX, double focalLengthY, const Eigen::Vector2d &principalPoint,
                             double skew);
 
             /**

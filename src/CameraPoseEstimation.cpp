@@ -130,12 +130,12 @@ namespace static_calibration {
 //			options.max_num_consecutive_invalid_steps = 15;
 //			options.max_num_iterations = weights.size();
             options.max_num_iterations = 400;
-//			options.num_threads = 1;
             auto processorCount = std::thread::hardware_concurrency();
             if (processorCount == 0) {
                 processorCount = 8;
             }
             options.num_threads = (int) processorCount;
+//            options.num_threads = 1;
             options.minimizer_progress_to_stdout = logSummary;
             options.update_state_every_iteration = true;
             if (!logSummary) {
@@ -240,37 +240,22 @@ namespace static_calibration {
         }
 
         void CameraPoseEstimation::addIntrinsicsConstraints(ceres::Problem &problem) {
-            if (intrinsicsFixed) {
-                intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
-                        static_calibration::calibration::residuals::DistanceResidual::create(
-                                initialIntrinsics[0]
-                        ),
-                        getScaledHuberLoss(1e52),
-                        &intrinsics[0]
-                ));
-            } else {
+            for (int i = 0; i < intrinsics.size(); ++i) {
+                double lowerBound = std::max(500., initialIntrinsics[i] * 0.9);
+                double upperBound = std::max(500., initialIntrinsics[i] * 1.1);
+                double scale = correspondenceLossUpperBound;
+
+                if (intrinsicsFixed) {
+                    lowerBound = initialIntrinsics[i];
+                    upperBound = initialIntrinsics[i];
+                    scale *= 3;
+                }
+
                 intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
                         static_calibration::calibration::residuals::DistanceFromIntervalResidual::create(
-                                0, initialIntrinsics[0] * 2
+                                lowerBound, upperBound, "intrinsics"
                         ),
-                        getScaledHuberLoss(1e52),
-                        &intrinsics[0]
-                ));
-            }
-            intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
-                    static_calibration::calibration::residuals::DistanceResidual::create(
-                            initialIntrinsics[1]
-                    ),
-                    getScaledHuberLoss(1e52),
-                    &intrinsics[1]
-            ));
-
-            for (int i = 2; i < 5; ++i) {
-                intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
-                        static_calibration::calibration::residuals::DistanceResidual::create(
-                                initialIntrinsics[i]
-                        ),
-                        getScaledHuberLoss(1e52),
+                        getScaledHuberLoss(scale),
                         &intrinsics[i]
                 ));
             }
@@ -438,13 +423,22 @@ namespace static_calibration {
         void CameraPoseEstimation::guessIntrinsics(const std::vector<double> &values) {
             intrinsicsGuessed = true;
             intrinsics = values;
+            if (intrinsics.size() == 4) {
+                intrinsics.emplace_back(0);
+            }
+            if (intrinsics.size() != 5) {
+                throw std::invalid_argument(
+                        "The given intrinsics are invalid. "
+                        "Provide them as {focal_x, focal_y, principal_x, principal_y, [skew (optional, defaults to 0)]}"
+                );
+            }
             initialIntrinsics = values;
         }
 
-        void CameraPoseEstimation::guessIntrinsics(double focalLength, double focalLengthRatio,
+        void CameraPoseEstimation::guessIntrinsics(double focalLengthX, double focalLengthY,
                                                    const Eigen::Vector2d &principalPoint, double skew) {
             intrinsicsGuessed = true;
-            intrinsics = {focalLength, focalLengthRatio, principalPoint.x(), principalPoint.y(), skew};
+            intrinsics = {focalLengthX, focalLengthY, principalPoint.x(), principalPoint.y(), skew};
             initialIntrinsics = intrinsics;
         }
 
