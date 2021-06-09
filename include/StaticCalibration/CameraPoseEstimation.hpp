@@ -155,7 +155,7 @@ namespace static_calibration {
             /**
              * An additional scaling factor for the rotation residuals.
              */
-            double rotationResidualScalingFactor = 10;
+            double rotationResidualScalingFactor = 500;
 
             /**
              * The distance from the mean of the world objects in z-direction used to estimate an initial guess for
@@ -215,6 +215,12 @@ namespace static_calibration {
              * The final loss of all residuals after optimization.
              */
             double totalLoss = 0;
+
+            /**
+             * Holds the maximal values of the expected pixels of the world objects.
+             * This is used to estimate the rough image size to constrain the principal point in the intrinsics optimization.
+             */
+            Eigen::Vector2d maxPixelValues;
 
             /**
              * Calculates the mean of the known world correspondences.

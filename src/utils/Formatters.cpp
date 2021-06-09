@@ -1,8 +1,9 @@
 //
 // Created by brucknem on 25.05.21.
 //
-
 #include "StaticCalibration/utils/Formatters.hpp"
+
+#include <iomanip>
 
 namespace static_calibration {
     namespace utils {
@@ -41,8 +42,8 @@ namespace static_calibration {
         }
 
         std::string
-        toROSXML(const calibration::CameraPoseEstimation &estimator, const std::string &measurementPoint,
-                 const std::string &cameraName) {
+        toROStf2Node(const calibration::CameraPoseEstimation &estimator, const std::string &measurementPoint,
+                     const std::string &cameraName) {
             tinyxml2::XMLPrinter printer;
             printer.OpenElement("launch");
 
@@ -86,6 +87,35 @@ namespace static_calibration {
 
             printer.CloseElement();
             return printer.CStr();
+        }
+
+        std::string
+        toROSParamsIntrinsics(const calibration::CameraPoseEstimation &estimator, const std::string &measurementPoint,
+                              const std::string &cameraName) {
+            auto intrinsics = estimator.getIntrinsics();
+
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(12);
+            ss << intrinsics[0] << ", " << 0 << ", " << intrinsics[2] << ", " << 0 << ", " << intrinsics[1] << ", "
+               << intrinsics[3] << ", " << 0 << ", " << 0 << ", " << 1;
+
+            YAML::Emitter out;
+            out << YAML::Comment("Author: Marcel Bruckner") << YAML::Newline;
+            out << YAML::Comment("Automatically generated - DO NOT EDIT!") << YAML::Newline;
+            out << YAML::Comment("For easy copying: " + ss.str()) << YAML::Newline;
+
+            out << YAML::BeginMap;
+            out << YAML::Key << "intrinsics/" + measurementPoint + "_" + cameraName;
+            out << YAML::BeginSeq;
+            out << intrinsics[0] << YAML::Comment("Focal length X [px]") << 0 << intrinsics[2]
+                << YAML::Comment("Principal point X [px]")
+                << 0 << intrinsics[1] << YAML::Comment("Focal length Y [px]") << intrinsics[3]
+                << YAML::Comment("Principal point Y [px]")
+                << 0 << 0 << YAML::Comment("Skew") << 1;
+            out << YAML::EndSeq;
+            out << YAML::EndMap;
+
+            return out.c_str();
         }
     }
 }

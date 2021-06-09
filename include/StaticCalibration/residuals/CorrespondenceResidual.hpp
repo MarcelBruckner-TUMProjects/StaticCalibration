@@ -62,7 +62,6 @@ namespace static_calibration {
                         const T *f_y,
                         const T *fy,
                         const T *cy,
-                        const T *skew,
                         const T *tx,
                         const T *ty,
                         const T *tz,

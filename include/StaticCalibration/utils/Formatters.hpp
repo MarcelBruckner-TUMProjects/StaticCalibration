@@ -11,8 +11,13 @@ namespace static_calibration {
     namespace utils {
         std::string toYAML(const static_calibration::calibration::CameraPoseEstimation &estimator);
 
-        std::string toROSXML(const calibration::CameraPoseEstimation &estimator, const std::string &measurementPoint,
-                             const std::string &cameraName);
+        std::string
+        toROStf2Node(const calibration::CameraPoseEstimation &estimator, const std::string &measurementPoint,
+                     const std::string &cameraName);
+
+        std::string
+        toROSParamsIntrinsics(const calibration::CameraPoseEstimation &estimator, const std::string &measurementPoint,
+                              const std::string &cameraName);
     }
 }
 

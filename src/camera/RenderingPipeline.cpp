@@ -19,9 +19,9 @@ namespace static_calibration {
         template Eigen::Matrix<double, 2, 1>
         render(const double *translation, const double *rotation, const double *intrinsics, const double *vector);
 
-        template Eigen::Matrix<ceres::Jet<double, 14>, 2, 1>
-        render(const ceres::Jet<double, 14> *translation, const ceres::Jet<double, 14> *rotation,
-               const ceres::Jet<double, 14> *intrinsics, const ceres::Jet<double, 14> *vector);
+        template Eigen::Matrix<ceres::Jet<double, 13>, 2, 1>
+        render(const ceres::Jet<double, 13> *translation, const ceres::Jet<double, 13> *rotation,
+               const ceres::Jet<double, 13> *intrinsics, const ceres::Jet<double, 13> *vector);
 
         template<typename T>
         Eigen::Matrix<T, 2, 1>
@@ -55,9 +55,9 @@ namespace static_calibration {
         template Eigen::Matrix<double, 2, 1>
         render<double>(const double *, const double *, const double *, const double *, bool &);
 
-        template Eigen::Matrix<ceres::Jet<double, 14>, 2, 1>
-        render<ceres::Jet<double, 14>>(const ceres::Jet<double, 14> *, const ceres::Jet<double, 14> *,
-                                       const ceres::Jet<double, 14> *, const ceres::Jet<double, 14> *, bool &);
+        template Eigen::Matrix<ceres::Jet<double, 13>, 2, 1>
+        render<ceres::Jet<double, 13>>(const ceres::Jet<double, 13> *, const ceres::Jet<double, 13> *,
+                                       const ceres::Jet<double, 13> *, const ceres::Jet<double, 13> *, bool &);
 
         template<typename T>
         Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *rotation) {
@@ -182,8 +182,8 @@ namespace static_calibration {
 
         template Eigen::Matrix<double, 3, 4> getIntrinsicsMatrix(const double *intrinsics);
 
-        template Eigen::Matrix<ceres::Jet<double, 14>, 3, 4>
-        getIntrinsicsMatrix(const ceres::Jet<double, 14> *intrinsics);
+        template Eigen::Matrix<ceres::Jet<double, 13>, 3, 4>
+        getIntrinsicsMatrix(const ceres::Jet<double, 13> *intrinsics);
 
         template<typename T>
         Eigen::Matrix<T, 3, 4> getIntrinsicsMatrix(const T *intrinsics, bool &invalid) {
@@ -193,15 +193,14 @@ namespace static_calibration {
             return getIntrinsicsMatrixFromConfig(new T[9]{
                     intrinsics[0], zero, intrinsics[2],
                     zero, intrinsics[1], intrinsics[3],
-//				zero, intrinsics[4], (T) 1
-                    zero, zero, (T) 1
+                    zero, (T) 0, (T) 1
             });
         }
 
         template Eigen::Matrix<double, 3, 4> getIntrinsicsMatrix(const double *intrinsics, bool &invalid);
 
-        template Eigen::Matrix<ceres::Jet<double, 14>, 3, 4>
-        getIntrinsicsMatrix(const ceres::Jet<double, 14> *intrinsics, bool &invalid);
+        template Eigen::Matrix<ceres::Jet<double, 13>, 3, 4>
+        getIntrinsicsMatrix(const ceres::Jet<double, 13> *intrinsics, bool &invalid);
 
         template<typename T>
         std::vector<T> getIntrinsicsFromRealSensor(const T *intrinsics) {
@@ -212,22 +211,20 @@ namespace static_calibration {
                     intrinsics[4]
             );
 
-            T skew = intrinsics[5];
-
             T focalLengthPXX = intrinsics[0] * (T) 1. / intrinsics[2];
             T focalLengthPXY = intrinsics[1] * (T) 1. / intrinsics[2];
 
             return
                     std::vector<T>
                             {
-                                    focalLengthPXX, focalLengthPXY, principalPoint(0, 0), principalPoint(1, 0), skew
+                                    focalLengthPXX, focalLengthPXY, principalPoint(0, 0), principalPoint(1, 0)
                             };
         }
 
         template std::vector<double> getIntrinsicsFromRealSensor(const double *intrinsics);
 
-        template std::vector<ceres::Jet<double, 14>>
-        getIntrinsicsFromRealSensor(const ceres::Jet<double, 14> *intrinsics);
+        template std::vector<ceres::Jet<double, 13>>
+        getIntrinsicsFromRealSensor(const ceres::Jet<double, 13> *intrinsics);
 
         template<typename T>
         Eigen::Matrix<T, 3, 4> getIntrinsicsMatrixFromConfig(const T *intrinsics) {
@@ -243,22 +240,22 @@ namespace static_calibration {
 
         template Eigen::Matrix<double, 3, 4> getIntrinsicsMatrixFromConfig(const double *intrinsics);
 
-        template Eigen::Matrix<ceres::Jet<double, 14>, 3, 4>
-        getIntrinsicsMatrixFromConfig(const ceres::Jet<double, 14> *intrinsics);
+        template Eigen::Matrix<ceres::Jet<double, 13>, 3, 4>
+        getIntrinsicsMatrixFromConfig(const ceres::Jet<double, 13> *intrinsics);
 
         std::vector<double> getBlenderCameraIntrinsics() {
             double pixelWidth = 32. / 1920.;
             double principalX = 1920. / 2;
             double principalY = 1200. / 2;
             std::vector<double> intrinsics{
-                    20, 20, pixelWidth, principalX, principalY, 0
+                    20, 20, pixelWidth, principalX, principalY
             };
             return getIntrinsicsFromRealSensor(intrinsics.data());
         }
 
         std::vector<double> getS40NCamFarIntrinsics() {
             return std::vector<double>{
-                    9023.482825, 9023.482825, 1222.314303, 557.541182, 0.000000
+                    9023.482825, 9023.482825, 1222.314303, 557.541182
             };
         }
 

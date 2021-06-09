@@ -19,7 +19,6 @@ namespace static_calibration {
                     const T *f_y,
                     const T *cx,
                     const T *cy,
-                    const T *skew,
                     const T *tx,
                     const T *ty,
                     const T *tz,
@@ -39,7 +38,7 @@ namespace static_calibration {
                 actualPixel = static_calibration::camera::render(
                         new T[3]{tx[0], ty[0], tz[0]},
                         new T[3]{rx[0], ry[0], rz[0]},
-                        new T[5]{f_x[0], f_y[0], cx[0], cy[0], skew[0]},
+                        new T[5]{f_x[0], f_y[0], cx[0], cy[0], (T) 0},
                         point.data(),
                         flipped
                 );
@@ -57,7 +56,7 @@ namespace static_calibration {
             ceres::CostFunction *
             CorrespondenceResidual::create(const Eigen::Matrix<double, 2, 1> &expectedPixel,
                                            const ParametricPoint &point) {
-                return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1>(
+                return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1>(
                         new CorrespondenceResidual(expectedPixel, point),
                         ceres::TAKE_OWNERSHIP
                 );

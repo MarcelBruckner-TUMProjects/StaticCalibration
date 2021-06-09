@@ -105,11 +105,11 @@ namespace static_calibration {
 
                 bool invalidCorrespondencesLoss =
                         correspondencesLoss > correspondenceLossUpperBound && !intrinsicsFixed;
-                if (lambdasLoss > 5 || rotationsLoss > 1e-6 || invalidCorrespondencesLoss || intrinsicsLoss > 5) {
+                if (lambdasLoss > 10 || rotationsLoss > 1e-6 || invalidCorrespondencesLoss || intrinsicsLoss > 5) {
                     continue;
                 }
                 double originalPenalize = lambdaResidualScalingFactor;
-                lambdaResidualScalingFactor = originalPenalize * 100;
+                lambdaResidualScalingFactor = originalPenalize * 10000;
                 solveProblem(logSummary);
                 lambdaResidualScalingFactor = originalPenalize;
                 break;
@@ -167,6 +167,8 @@ namespace static_calibration {
             }
         }
 
+        // TODO do not recreate; Create only once by dedicated call and reset values in residual blocks.
+        // TODO This should remove the memory leak!!!
         ceres::Problem CameraPoseEstimation::createProblem() {
             auto problem = ceres::Problem();
             for (auto p : weights) {
@@ -177,6 +179,7 @@ namespace static_calibration {
             weightResiduals.clear();
             lambdaResiduals.clear();
             intrinsicsResiduals.clear();
+
 
             for (auto &worldObject : worldObjects) {
                 for (const auto &point : worldObject.getCenterLine()) {
@@ -226,7 +229,6 @@ namespace static_calibration {
                     &intrinsics[1],
                     &intrinsics[2],
                     &intrinsics[3],
-                    &intrinsics[4],
                     &translation.x(),
                     &translation.y(),
                     &translation.z(),
@@ -250,7 +252,6 @@ namespace static_calibration {
                     upperBound = initialIntrinsics[i];
                     scale *= 3;
                 }
-
                 intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
                         static_calibration::calibration::residuals::DistanceFromIntervalResidual::create(
                                 lowerBound, upperBound, "intrinsics"
@@ -298,7 +299,8 @@ namespace static_calibration {
             }
         }
 
-        const std::vector<static_calibration::calibration::WorldObject> &CameraPoseEstimation::getWorldObjects() const {
+        const std::vector<static_calibration::calibration::WorldObject> &
+        CameraPoseEstimation::getWorldObjects() const {
             return worldObjects;
         }
 
@@ -316,7 +318,8 @@ namespace static_calibration {
             os << "Rotation:" << std::endl;
             os << "From:       " << printVectorRow(estimator.initialRotation) << std::endl;
             os << "To:         " << printVectorRow(estimator.getRotation()) << std::endl;
-            os << "Difference: " << printVectorRow(estimator.getRotation() - estimator.initialRotation) << std::endl;
+            os << "Difference: " << printVectorRow(estimator.getRotation() - estimator.initialRotation)
+               << std::endl;
 
 
             os << "Intrinsics:" << std::endl;
@@ -423,16 +426,13 @@ namespace static_calibration {
         void CameraPoseEstimation::guessIntrinsics(const std::vector<double> &values) {
             intrinsicsGuessed = true;
             intrinsics = values;
-            if (intrinsics.size() == 4) {
-                intrinsics.emplace_back(0);
-            }
-            if (intrinsics.size() != 5) {
+            if (intrinsics.size() != 4) {
                 throw std::invalid_argument(
                         "The given intrinsics are invalid. "
-                        "Provide them as {focal_x, focal_y, principal_x, principal_y, [skew (optional, defaults to 0)]}"
+                        "Provide them as {focal_x, focal_y, principal_x, principal_y}"
                 );
             }
-            initialIntrinsics = values;
+            initialIntrinsics = intrinsics;
         }
 
         void CameraPoseEstimation::guessIntrinsics(double focalLengthX, double focalLengthY,

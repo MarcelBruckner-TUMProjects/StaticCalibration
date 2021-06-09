@@ -34,18 +34,22 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    auto outFilename = boost::filesystem::path(
-            parsedOptions.measurementPointName + "_" + parsedOptions.cameraName + ".launch");
+    auto basename = parsedOptions.measurementPointName + "_" + parsedOptions.cameraName + "_";
     std::ofstream outFile;
-    outFile.open(outFilename.string());
 
-//    std::cout << estimator.getTranslation() << std::endl;
-//    estimator.guessTranslation(estimator.getTranslation() - origin);
-//    std::cout << estimator.getTranslation() << std::endl;
-    auto rosXML = static_calibration::utils::toROSXML(estimator, parsedOptions.measurementPointName,
-                                                      parsedOptions.cameraName);
+    outFile.open(basename + "transformations.launch");
+    auto rosXML = static_calibration::utils::toROStf2Node(estimator, parsedOptions.measurementPointName,
+                                                          parsedOptions.cameraName);
     std::cout << rosXML << std::endl;
     outFile << rosXML;
+    outFile.close();
+
+    outFile.open(basename + "intrinsics.yaml");
+    auto intrinsicsYAML = static_calibration::utils::toROSParamsIntrinsics(estimator,
+                                                                           parsedOptions.measurementPointName,
+                                                                           parsedOptions.cameraName);
+    std::cout << intrinsicsYAML << std::endl;
+    outFile << intrinsicsYAML;
     outFile.close();
 
     return EXIT_SUCCESS;

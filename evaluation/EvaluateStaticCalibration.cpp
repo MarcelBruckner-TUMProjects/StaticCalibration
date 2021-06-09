@@ -109,7 +109,7 @@ int main(int argc, char const *argv[]) {
 
     const char *windowName = "Evaluate Static Calibration";
     cv::namedWindow(windowName);
-    int trackbarShowIds = 0;
+    int trackbarShowIds = 1;
     cv::createTrackbar("Show IDs", windowName, &trackbarShowIds, 1);
 
     Eigen::Vector3d translation;
