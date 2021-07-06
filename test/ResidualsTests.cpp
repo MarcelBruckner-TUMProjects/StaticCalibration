@@ -8,6 +8,7 @@
 #include "StaticCalibration/residuals/DistanceFromIntervalResidual.hpp"
 #include "StaticCalibration/residuals/CorrespondenceResidual.hpp"
 #include <utility>
+#include <StaticCalibration/residuals/CorrespondenceWithIntrinsicsResidual.hpp>
 
 using namespace static_calibration::calibration::residuals;
 
@@ -28,7 +29,7 @@ namespace static_calibration {
             void assertParametricPoint(static_calibration::calibration::ParametricPoint point, Eigen::Vector2d
             expectedResidual) {
                 Eigen::Vector2d residual;
-                CorrespondenceResidual correspondenceResidual = {
+                static_calibration::calibration::residuals::CorrespondenceWithIntrinsicsResidual correspondenceResidual = {
                         point.getExpectedPixel(), point,
                 };
                 correspondenceResidual(

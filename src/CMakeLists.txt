@@ -27,7 +27,9 @@ add_library(StaticCalibration-lib
         camera/RenderingPipeline.cpp
         residuals/DistanceFromIntervalResidual.cpp
         residuals/DistanceResidual.cpp
+        residuals/CorrespondenceResidualBase.cpp
         residuals/CorrespondenceResidual.cpp
+        residuals/CorrespondenceWithIntrinsicsResidual.cpp
         objects/ParametricPoint.cpp
         objects/WorldObject.cpp
         objects/ObjectsLoading.cpp

@@ -2,8 +2,8 @@
 // Created by brucknem on 11.04.21.
 //
 
-#ifndef CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP
-#define CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP
+#ifndef CAMERASTABILIZATION_CORRESPONDENCEWITHINTRINSICSRESIDUAL_HPP
+#define CAMERASTABILIZATION_CORRESPONDENCEWITHINTRINSICSRESIDUAL_HPP
 
 #include "Eigen/Dense"
 #include "ceres/ceres.h"
@@ -17,12 +17,7 @@ namespace static_calibration {
             /**
              * A residual term used in the optimization process to find the camera pose.
              */
-            class CorrespondenceResidual : public CorrespondenceResidualBase {
-            protected:
-                /**
-                 * The intrinsic camera parameters used to project the point.
-                 */
-                std::vector<double> intrinsics;
+            class CorrespondenceWithIntrinsicsResidual : public CorrespondenceResidualBase {
 
             public:
                 /**
@@ -33,13 +28,13 @@ namespace static_calibration {
                  * @param intrinsics The intrinsics of the pinhole camera model.
                  * @param imageSize The [width, height] of the image.
                  */
-                CorrespondenceResidual(Eigen::Matrix<double, 2, 1> expectedPixel,
-                                       const ParametricPoint &point, std::vector<double> intrinsics);
+                CorrespondenceWithIntrinsicsResidual(Eigen::Matrix<double, 2, 1> expectedPixel,
+                                                     const ParametricPoint &point);
 
                 /**
                  * @destructor
                  */
-                ~CorrespondenceResidual() override = default;
+                virtual ~CorrespondenceWithIntrinsicsResidual() = default;
 
                 /**
                  * Calculates the residual error after transforming the world position to a pixel.
@@ -54,6 +49,10 @@ namespace static_calibration {
                  */
                 template<typename T>
                 bool operator()(
+                        const T *f_x,
+                        const T *f_y,
+                        const T *fy,
+                        const T *cy,
                         const T *tx,
                         const T *ty,
                         const T *tz,
@@ -69,12 +68,11 @@ namespace static_calibration {
                 /**
                  * Factory method to hide the residual creation.
                  */
-                static ceres::CostFunction *
-                create(const Eigen::Matrix<double, 2, 1> &expectedPixel, const ParametricPoint &point,
-                       const std::vector<double> &intrinsics);
+                static ceres::CostFunction *create(const Eigen::Matrix<double, 2, 1> &expectedPixel,
+                                                   const ParametricPoint &point);
             };
         }
     }
 }
 
-#endif //CAMERASTABILIZATION_CORRESPONDENCERESIDUAL_HPP
+#endif //CAMERASTABILIZATION_CORRESPONDENCEWITHINTRINSICSRESIDUAL_HPP

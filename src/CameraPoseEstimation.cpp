@@ -6,6 +6,7 @@
 
 #include "ceres/autodiff_cost_function.h"
 #include <thread>
+#include <StaticCalibration/residuals/CorrespondenceWithIntrinsicsResidual.hpp>
 
 namespace static_calibration {
     namespace calibration {
@@ -135,7 +136,7 @@ namespace static_calibration {
                 processorCount = 8;
             }
             options.num_threads = (int) processorCount;
-//            options.num_threads = 1;
+            options.num_threads = 1;
             options.minimizer_progress_to_stdout = logSummary;
             options.update_state_every_iteration = true;
             if (!logSummary) {
@@ -182,10 +183,13 @@ namespace static_calibration {
 
 
             for (auto &worldObject : worldObjects) {
+                double height = worldObject.getHeight();
                 for (const auto &point : worldObject.getCenterLine()) {
                     weights.emplace_back(new double(1));
                     correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
-                    lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point, worldObject.getHeight()));
+                    if (height > 0) {
+                        lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point, height));
+                    }
                     weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
                 }
             }
@@ -220,7 +224,7 @@ namespace static_calibration {
         ceres::ResidualBlockId
         CameraPoseEstimation::addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point) {
             return problem.AddResidualBlock(
-                    residuals::CorrespondenceResidual::create(
+                    residuals::CorrespondenceWithIntrinsicsResidual::create(
                             point.getExpectedPixel(),
                             point
                     ),
