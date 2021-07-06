@@ -23,17 +23,23 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 ########################################################################################################################
 
 add_library(StaticCalibration-lib
+        CameraPoseEstimationBase.cpp
         CameraPoseEstimation.cpp
+        CameraPoseEstimationWithIntrinsics.cpp
+
         camera/RenderingPipeline.cpp
+
         residuals/DistanceFromIntervalResidual.cpp
         residuals/DistanceResidual.cpp
         residuals/CorrespondenceResidualBase.cpp
         residuals/CorrespondenceResidual.cpp
         residuals/CorrespondenceWithIntrinsicsResidual.cpp
+
         objects/ParametricPoint.cpp
         objects/WorldObject.cpp
         objects/ObjectsLoading.cpp
         objects/YAMLExtension.cpp
+
         utils/CommandLineParser.cpp
         utils/Formatters.cpp
         )

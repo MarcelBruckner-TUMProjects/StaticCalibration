@@ -4,7 +4,7 @@
 
 #include <thread>
 #include "StaticCalibration/objects/ObjectsLoading.hpp"
-#include "StaticCalibration/CameraPoseEstimation.hpp"
+#include "StaticCalibration/CameraPoseEstimationWithIntrinsics.hpp"
 
 #include "glog/logging.h"
 #include <boost/filesystem.hpp>
@@ -19,9 +19,7 @@ int main(int argc, char const *argv[]) {
 //    auto origin = static_calibration::calibration::getOrigin(parsedOptions.objectsFile, "4007847");
     auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile);
 
-    static_calibration::calibration::CameraPoseEstimation estimator;
-    estimator.addWorldObjects(objects);
-    estimator.guessIntrinsics(parsedOptions.intrinsics);
+    static_calibration::calibration::CameraPoseEstimationWithIntrinsics estimator(parsedOptions.intrinsics);
 //    estimator.fixIntrinsics(true);
 
     google::InitGoogleLogging("Static Calibration");

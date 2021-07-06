@@ -51,10 +51,6 @@ namespace static_calibration {
                 residual[0] = residual[0] * weight[0];
                 residual[1] = residual[1] * weight[0];
 
-                for (int i = 0; i < 3; i++) {
-//                    std::cout << residual[i] << std::endl;
-                }
-
                 return !flipped;
             }
 

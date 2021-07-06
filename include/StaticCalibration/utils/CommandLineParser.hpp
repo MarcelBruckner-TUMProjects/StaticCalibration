@@ -57,6 +57,11 @@ namespace static_calibration {
             std::vector<double> intrinsics;
 
             /**
+             * Flag if intrinsics should be optimized.
+             */
+            bool withIntrinsics;
+
+            /**
              * Flag if the progress of the ceres optimizer should be logged.
              */
             bool logEstimationProgress;

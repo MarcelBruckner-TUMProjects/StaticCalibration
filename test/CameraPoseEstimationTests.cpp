@@ -1,9 +1,10 @@
 #include "gtest/gtest.h"
 #include <iostream>
 #include <utility>
+#include <StaticCalibration/CameraPoseEstimation.hpp>
 
 #include "CameraTestBase.hpp"
-#include "StaticCalibration/CameraPoseEstimation.hpp"
+#include "StaticCalibration/CameraPoseEstimationWithIntrinsics.hpp"
 #include "StaticCalibration/camera/RenderingPipeline.hpp"
 
 using namespace static_calibration::calibration;
@@ -17,7 +18,7 @@ namespace static_calibration {
         class CameraPoseEstimationTests : public CameraTestBase {
         protected:
 
-            std::shared_ptr<static_calibration::calibration::CameraPoseEstimation> estimator;
+            std::shared_ptr<static_calibration::calibration::CameraPoseEstimationBase> estimator;
 
             /**
              * @destructor
@@ -130,8 +131,8 @@ namespace static_calibration {
          * Tests that the initial guess is 500m above the mean.
          */
         TEST_F(CameraPoseEstimationTests, testCalculateInitialGuess) {
-            estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimation>();
-            estimator->guessIntrinsics(intrinsics);
+            estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimationWithIntrinsics>(
+                    intrinsics);
 
             addPointCorrespondence({0, 0, 9});
             addPointCorrespondence({0, 0, -9});
@@ -152,9 +153,7 @@ namespace static_calibration {
          * Tests that the optimization converges to the expected extrinsic parameters.
          */
         TEST_F(CameraPoseEstimationTests, testEstimationOnlyWorldPositions) {
-            estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimation>();
-            estimator->guessIntrinsics(intrinsics);
-            estimator->fixIntrinsics(true);
+            estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimation>(intrinsics);
             addSomePointCorrespondences();
             assertEstimation();
         }
@@ -165,17 +164,17 @@ namespace static_calibration {
          */
         TEST_F(CameraPoseEstimationTests, testRotationInPlusMinus180) {
             assertVectorsNearEqual(
-                    static_calibration::calibration::CameraPoseEstimation::clearRotation(
+                    static_calibration::calibration::CameraPoseEstimationWithIntrinsics::clearRotation(
                             Eigen::Vector3d{720 + 270, -720 + 90, 12345}),
                     Eigen::Vector3d{-90, 90, 105});
 
             assertVectorsNearEqual(
-                    static_calibration::calibration::CameraPoseEstimation::clearRotation(
+                    static_calibration::calibration::CameraPoseEstimationWithIntrinsics::clearRotation(
                             Eigen::Vector3d{180, 0, -180}),
                     Eigen::Vector3d{180, 0, -180});
 
             assertVectorsNearEqual(
-                    static_calibration::calibration::CameraPoseEstimation::clearRotation(
+                    static_calibration::calibration::CameraPoseEstimationWithIntrinsics::clearRotation(
                             Eigen::Vector3d{90, 0, -90}),
                     Eigen::Vector3d{90, 0, -90});
         }
@@ -185,9 +184,7 @@ namespace static_calibration {
          * Tests that the optimization converges to the expected extrinsic parameters.
          */
         TEST_F(CameraPoseEstimationTests, testEstimationOnlyPosts) {
-            estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimation>();
-            estimator->guessIntrinsics(intrinsics);
-            estimator->fixIntrinsics(true);
+            estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimation>(intrinsics);
 
             Eigen::Vector3d origin, axisA, axisB;
             origin << 0, 0, 0;

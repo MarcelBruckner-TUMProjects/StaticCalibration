@@ -21,11 +21,13 @@ namespace static_calibration {
         const char *EVALUATION_BACKGROUND_FRAME_OPTION_NAME = "evaluation_background_frame";
         const char *EVALUATION_RUNS_OPTION_NAME = "evaluation_runs";
         const char *INTRINSICS_OPTION_NAME = "intrinsics";
+        const char *WITH_INTRINSICS_OPTION_NAME = "with_intrinsics";
         const char *LOG_ESTIMATION_PROGRESS_OPTION_NAME = "log";
         const char *CAMERA_NAME_OPTION_NAME = "camera_name";
         const char *MEASUREMENT_POINT_OPTION_NAME = "measurement_point";
 
         bool logEstimationProgress = false;
+        bool withIntrinsics = false;
 
         boost::program_options::options_description createOptionsDescription() {
             boost::program_options::options_description desc("Usage of the Static Calibration estimator", 120);
@@ -83,6 +85,11 @@ namespace static_calibration {
                      "To get information about the used pinhole camera model please visit: \nhttps://en.wikipedia.org/wiki/Pinhole_camera_model");
 
             desc.add_options()
+                    ((std::string(WITH_INTRINSICS_OPTION_NAME) + ",w").c_str(),
+                     boost::program_options::bool_switch(&withIntrinsics),
+                     "Flag if the intrinsics should be optimized.");
+
+            desc.add_options()
                     ((std::string(LOG_ESTIMATION_PROGRESS_OPTION_NAME) + ",l").c_str(),
                      boost::program_options::bool_switch(&logEstimationProgress),
                      "Flag if the progress of the estimation should be logged to STDOUT.");
@@ -122,6 +129,7 @@ namespace static_calibration {
                     evaluationBackgroundFrame,
                     evaluationRuns,
                     variables_map[INTRINSICS_OPTION_NAME].as<std::vector<double>>(),
+                    withIntrinsics,
                     logEstimationProgress
             };
 

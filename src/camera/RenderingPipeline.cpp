@@ -23,6 +23,10 @@ namespace static_calibration {
         render(const ceres::Jet<double, 13> *translation, const ceres::Jet<double, 13> *rotation,
                const ceres::Jet<double, 13> *intrinsics, const ceres::Jet<double, 13> *vector);
 
+        template Eigen::Matrix<ceres::Jet<double, 9>, 2, 1>
+        render(const ceres::Jet<double, 9> *translation, const ceres::Jet<double, 9> *rotation,
+               const ceres::Jet<double, 9> *intrinsics, const ceres::Jet<double, 9> *vector);
+
         template<typename T>
         Eigen::Matrix<T, 2, 1>
         render(const T *translation, const T *rotation, const T *intrinsics, const T
@@ -58,6 +62,10 @@ namespace static_calibration {
         template Eigen::Matrix<ceres::Jet<double, 13>, 2, 1>
         render<ceres::Jet<double, 13>>(const ceres::Jet<double, 13> *, const ceres::Jet<double, 13> *,
                                        const ceres::Jet<double, 13> *, const ceres::Jet<double, 13> *, bool &);
+
+        template Eigen::Matrix<ceres::Jet<double, 9>, 2, 1>
+        render<ceres::Jet<double, 9>>(const ceres::Jet<double, 9> *, const ceres::Jet<double, 9> *,
+                                      const ceres::Jet<double, 9> *, const ceres::Jet<double, 9> *, bool &);
 
         template<typename T>
         Eigen::Matrix<T, 4, 4> getCameraRotationMatrix(const T *rotation) {

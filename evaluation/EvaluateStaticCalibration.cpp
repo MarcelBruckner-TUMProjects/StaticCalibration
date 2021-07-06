@@ -8,7 +8,7 @@
 #include "StaticCalibration/camera/RenderingPipeline.hpp"
 #include "StaticCalibration/objects/WorldObject.hpp"
 #include "StaticCalibration/objects/ObjectsLoading.hpp"
-#include "StaticCalibration/CameraPoseEstimation.hpp"
+#include "StaticCalibration/CameraPoseEstimationBase.hpp"
 #include "StaticCalibration/utils/CommandLineParser.hpp"
 #include "CSVWriter.hpp"
 
@@ -18,6 +18,8 @@
 #ifdef WITH_OPENCV
 
 #include <opencv2/opencv.hpp>
+#include <StaticCalibration/CameraPoseEstimation.hpp>
+#include <StaticCalibration/CameraPoseEstimationWithIntrinsics.hpp>
 
 /**
  * Renders the current state of the estimator and some exemplary text onto the frame.
@@ -26,7 +28,8 @@
  * @param estimator The estimator that performs static calibration.
  * @param run The index of the current run.
  */
-void renderText(cv::Mat &finalFrame, const static_calibration::calibration::CameraPoseEstimation &estimator, int run);
+void
+renderText(cv::Mat &finalFrame, const static_calibration::calibration::CameraPoseEstimationBase *estimator, int run);
 
 /**
  * Renders an object onto the frame.
@@ -81,10 +84,10 @@ static_calibration::evaluation::CSVWriter *initCSVWriters();
  *
  * @param csvWriter The csv writer.
  * @param run The current estimation run.
- * @param estimator The pose estimator.
+ * @param estimator The pose estimator->
  */
 void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
-                static_calibration::calibration::CameraPoseEstimation &estimator);
+                static_calibration::calibration::CameraPoseEstimationBase *estimator);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,9 +100,14 @@ int main(int argc, char const *argv[]) {
 
     auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile);
     google::InitGoogleLogging("Static Calibration");
-    static_calibration::calibration::CameraPoseEstimation estimator;
-    estimator.guessIntrinsics(parsedOptions.intrinsics);
-//    estimator.fixIntrinsics(true);
+
+    static_calibration::calibration::CameraPoseEstimationBase *estimator;
+    if (parsedOptions.withIntrinsics) {
+        estimator = new static_calibration::calibration::CameraPoseEstimationWithIntrinsics(parsedOptions.intrinsics);
+    } else {
+        estimator = new static_calibration::calibration::CameraPoseEstimation(parsedOptions.intrinsics);
+    }
+
     auto csvWriter = initCSVWriters();
 
 #ifdef WITH_OPENCV
@@ -125,7 +133,7 @@ int main(int argc, char const *argv[]) {
 #endif //WITH_COVERAGE
 
     for (int i = 0;; ++i) {
-        if (estimator.isEstimationFinished()) {
+        if (estimator->isEstimationFinished()) {
             if (run >= 0) {
                 writeToCSV(csvWriter, run, estimator);
             }
@@ -133,21 +141,21 @@ int main(int argc, char const *argv[]) {
                 break;
             }
             run++;
-            estimator.clearWorldObjects();
-            estimator.addWorldObjects(objects);
-            estimator.guessIntrinsics(parsedOptions.intrinsics);
+            estimator->clearWorldObjects();
+            estimator->addWorldObjects(objects);
+            estimator->setIntrinsics(parsedOptions.intrinsics);
 
 #ifdef WITH_OPENCV
-            estimator.estimateAsync(parsedOptions.logEstimationProgress);
+            estimator->estimateAsync(parsedOptions.logEstimationProgress);
 #else //WITH_OPENCV
-            estimator.estimate(parsedOptions.logEstimationProgress);
+            estimator->estimate(parsedOptions.logEstimationProgress);
 #endif //WITH_OPENCV
         }
 
 #ifdef WITH_OPENCV
-        translation = estimator.getTranslation();
-        rotation = estimator.getRotation();
-        intrinsics = estimator.getIntrinsics();
+        translation = estimator->getTranslation();
+        rotation = estimator->getRotation();
+        intrinsics = estimator->getIntrinsics();
 
         finalFrame = evaluationFrame * 0.5;
         render(finalFrame, objects, translation, rotation, intrinsics, trackbarShowIds);
@@ -253,7 +261,8 @@ cv::Mat addAlphaChannel(const cv::Mat &mat) {
 }
 
 
-void renderText(cv::Mat &finalFrame, const static_calibration::calibration::CameraPoseEstimation &estimator, int run) {
+void
+renderText(cv::Mat &finalFrame, const static_calibration::calibration::CameraPoseEstimationBase *estimator, int run) {
     int lineHeight = 34;
     cv::rectangle(finalFrame, {0, finalFrame.rows - lineHeight * 3 - 10}, {500, finalFrame.rows}, {0, 0, 0}, -1);
     cv::rectangle(finalFrame, {finalFrame.cols - 800 - 10, finalFrame.rows - lineHeight * 12 - 10},
@@ -307,8 +316,8 @@ static_calibration::evaluation::CSVWriter *initCSVWriters() {
 }
 
 void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
-                static_calibration::calibration::CameraPoseEstimation &estimator) {
-    auto weights = estimator.getWeights();
+                static_calibration::calibration::CameraPoseEstimationBase *estimator) {
+    auto weights = estimator->getWeights();
 
     double min_w = 1e100;
     double max_w = -1e100;
@@ -325,16 +334,16 @@ void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
 
     *csvWriter << run
                << (int) weights.size()
-               << estimator.hasFoundValidSolution()
-               << estimator.getTotalLoss()
-               << estimator.getCorrespondencesLoss()
-               << estimator.getLambdasLoss()
-               << estimator.getIntrinsicsLoss()
-               << estimator.getRotationsLoss()
-               << estimator.getWeightsLoss()
-               << estimator.getTranslation()
-               << estimator.getRotation()
-               << estimator.getIntrinsics()
+               << estimator->hasFoundValidSolution()
+               << estimator->getTotalLoss()
+               << estimator->getCorrespondencesLoss()
+               << estimator->getLambdasLoss()
+               << estimator->getIntrinsicsLoss()
+               << estimator->getRotationsLoss()
+               << estimator->getWeightsLoss()
+               << estimator->getTranslation()
+               << estimator->getRotation()
+               << estimator->getIntrinsics()
                << sum_w / weights.size()
                << min_w
                << max_w
