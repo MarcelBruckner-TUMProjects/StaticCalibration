@@ -60,7 +60,7 @@ namespace static_calibration {
             for (int i = 0; i < intrinsics.size(); ++i) {
                 double lowerBound = std::max(500., initialIntrinsics[i] * 0.9);
                 double upperBound = std::max(500., initialIntrinsics[i] * 1.1);
-                double scale = correspondenceLossUpperBound;
+                double scale = getCorrespondenceLossUpperBound();
 
                 intrinsicsResiduals.emplace_back(problem.AddResidualBlock(
                         static_calibration::calibration::residuals::DistanceFromIntervalResidual::create(

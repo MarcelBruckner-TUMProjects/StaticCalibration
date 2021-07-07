@@ -16,6 +16,8 @@ namespace static_calibration {
 
         public:
             explicit CameraPoseEstimation(const std::vector<double> &intrinsics);
+
+            int getCorrespondenceLossUpperBound() const override;
         };
     }
 }

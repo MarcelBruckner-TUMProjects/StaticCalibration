@@ -326,12 +326,6 @@ namespace static_calibration {
                  * The weights of the correspondence residual blocks.
                  */
             std::vector<double *> weights;
-            /**
-                 * An upper bound for the correspondence loss relative to the number of correspondences.
-                 *
-                 * This is used to determine if the found solution is the global minimum.
-                 */
-            double correspondenceLossUpperBound = 1;
 
             /**
              * The current [f_x, ratio, c_x, c_y, skew] intrinsics values of the pinhole camera model.
@@ -444,6 +438,11 @@ namespace static_calibration {
             friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimationBase &estimator);
 
             /**
+             * @stream
+             */
+            friend std::ostream &operator<<(std::ostream &os, const CameraPoseEstimationBase *estimator);
+
+            /**
              * @set
              */
             void setWeightPenalizeScale(double weightPenalizeScale);
@@ -503,7 +502,12 @@ namespace static_calibration {
             /**
              * @get
              */
-            double getIntrinsicsLoss() const;;
+            double getIntrinsicsLoss() const;
+
+            virtual /**
+             * @get
+             */
+            int getCorrespondenceLossUpperBound() const;
         };
     }
 }

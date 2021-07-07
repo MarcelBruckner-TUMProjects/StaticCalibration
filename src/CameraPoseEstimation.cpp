@@ -30,5 +30,9 @@ namespace static_calibration {
 
         CameraPoseEstimation::CameraPoseEstimation(const std::vector<double> &intrinsics) : CameraPoseEstimationBase(
                 intrinsics) {}
+
+        int CameraPoseEstimation::getCorrespondenceLossUpperBound() const {
+            return CameraPoseEstimationBase::getCorrespondenceLossUpperBound() * 10;
+        }
     }
 }

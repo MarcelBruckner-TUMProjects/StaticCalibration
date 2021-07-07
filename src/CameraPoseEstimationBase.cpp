@@ -105,7 +105,7 @@ namespace static_calibration {
                 solveProblem(logSummary);
 
                 bool invalidCorrespondencesLoss =
-                        correspondencesLoss > correspondenceLossUpperBound;
+                        correspondencesLoss > getCorrespondenceLossUpperBound();
                 if (lambdasLoss > 10 || rotationsLoss > 1e-6 || invalidCorrespondencesLoss || intrinsicsLoss > 5) {
                     continue;
                 }
@@ -136,7 +136,7 @@ namespace static_calibration {
                 processorCount = 8;
             }
             options.num_threads = (int) processorCount;
-            options.num_threads = 1;
+//            options.num_threads = 1;
             options.minimizer_progress_to_stdout = logSummary;
             options.update_state_every_iteration = true;
             if (!logSummary) {
@@ -189,7 +189,6 @@ namespace static_calibration {
                     weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
                 }
             }
-            correspondenceLossUpperBound = weightResiduals.size();
             addRotationConstraints(problem);
 
 //			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
@@ -259,6 +258,11 @@ namespace static_calibration {
 
         bool CameraPoseEstimationBase::isEstimationFinished() const {
             return optimizationFinished;
+        }
+
+        std::ostream &operator<<(std::ostream &os, const CameraPoseEstimationBase *estimator) {
+            os << *estimator;
+            return os;
         }
 
         std::ostream &operator<<(std::ostream &os, const CameraPoseEstimationBase &estimator) {
@@ -391,6 +395,10 @@ namespace static_calibration {
 
         double CameraPoseEstimationBase::getIntrinsicsLoss() const {
             return intrinsicsLoss;
+        }
+
+        int CameraPoseEstimationBase::getCorrespondenceLossUpperBound() const {
+            return (int) weightResiduals.size();
         }
 
 

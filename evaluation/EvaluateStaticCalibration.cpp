@@ -119,11 +119,11 @@ int main(int argc, char const *argv[]) {
     cv::namedWindow(windowName);
     int trackbarShowIds = 1;
     cv::createTrackbar("Show IDs", windowName, &trackbarShowIds, 1);
+#endif //WITH_OPENCV
 
     Eigen::Vector3d translation;
     Eigen::Vector3d rotation;
     std::vector<double> intrinsics;
-#endif //WITH_OPENCV
 
     int run = -1;
     int maxRuns = parsedOptions.evaluationRuns;
