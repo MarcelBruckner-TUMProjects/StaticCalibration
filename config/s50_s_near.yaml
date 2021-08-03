@@ -1,0 +1,9 @@
+measurement_point: "s50"
+camera_name: "s_cam_near"
+objects_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_4/2021-06-02_1490_Providentia_Plus_Plus_1_4.yaml"
+pixels_file: "/mnt/local_data/providentia/static_calibration/s50/s/near/frame.bmp_result.yaml"
+background_frame: "/mnt/local_data/providentia/static_calibration/s50/s/near/frame.bmp"
+intrinsics: [ 2820.460044, 2816.221512, 960.667182, 525.863289 ]
+optimize_intrinsics: False
+evaluation_runs: 10
+log_optimization: True
