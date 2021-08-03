@@ -85,6 +85,16 @@ camera_name: <string>
 # To create the objects file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
 objects_file: <string>
 
+# The absolute or relative path to the file containing the lane samples
+# The lane samples need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# To create the lane samples file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
+lane_samples_file: <string>
+
+# The absolute or relative path to the file containing the explicit road marks
+# The explicit road marks need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# To create the explicit road marks file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
+explicit_road_marks_file: <string>
+
 # The absolute or relative path to the file containing the marked pixels
 # To create the pixels file from a keyframe extracted from a video visit: https://github.com/Brucknem/DataAnnotationTools
 pixels_file: <string>
