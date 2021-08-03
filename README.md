@@ -99,10 +99,6 @@ explicit_road_marks_file: <string>
 # To create the pixels file from a keyframe extracted from a video visit: https://github.com/Brucknem/DataAnnotationTools
 pixels_file: <string>
 
-# [Optional] Only used when compiled with -DWITH_OPENCV=ON
-# The absolute or relative path to the file containing the background frame, used during evaluation
-background_frame: <string>
-
 # The intrinsic camera parameters according to the pinhole camera model
 # All parameters need to be in pixels (except for skew)
 # To get information about the used pinhole camera model please visit: https://en.wikipedia.org/wiki/Pinhole_camera_model
@@ -112,6 +108,10 @@ intrinsics:
   - <double>  # The principal point coordinate along the horizontal axis
   - <double>  # The principal point coordinate along the vertical axis
   - <double>  # [Optional] The skew, defaults to 0
+
+# [Optional] Only used when compiled with -DWITH_OPENCV=ON
+# The absolute or relative path to the file containing the background frame, used during evaluation
+background_frame: <string>
 
 # [Optional] Optimize intrinsic camera parameters together with the extrinsics, defaults to False
 optimize_intrinsics: <True | False>
