@@ -27,9 +27,19 @@ namespace static_calibration {
             std::string objectsFile;
 
             /**
-             * The path to the pixels file containing the pixels corresponding to world objects.
+             * The path to the file containing the pixels corresponding to world objects.
              */
             std::string pixelsFile;
+
+            /**
+             * The path to the file containing the lane samples.
+             */
+            std::string laneSamplesFile;
+
+            /**
+             * The path to the file containing the explicit road marks.
+             */
+            std::string explicitRoadMarksFile;
 
             /**
              * The name of the measurement point, e.g. s50.

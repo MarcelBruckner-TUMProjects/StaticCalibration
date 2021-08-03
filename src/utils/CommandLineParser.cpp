@@ -33,7 +33,8 @@ namespace static_calibration {
                     ((std::string(CONFIG_FILE_OPTION_NAME) + ",c").c_str(),
                      boost::program_options::value<std::string>(),
                      "The path to the config file."
-                     "For explanations about the config files see the 'config' folder or visit: \n"
+                     "For examples of config files see the 'config' folder."
+                     "For explanations about the config files read the Readme.md or visit: \n"
                      "https://github.com/Brucknem/OpenDRIVE");
 
             return desc;
@@ -70,12 +71,6 @@ namespace static_calibration {
                 evaluationRuns = config["evaluation_runs"].as<int>();
             }
 
-            auto objectsFile = config["objects_file"].as<std::string>();
-            auto pixelsFile = config["pixels_file"].as<std::string>();
-            auto measurementPoint = config["measurement_point"].as<std::string>();
-            auto cameraName = config["camera_name"].as<std::string>();
-            auto intrinsics = config["intrinsics"].as<std::vector<double>>();
-
             auto optimizeIntrinsics = false;
             if (config["optimize_intrinsics"].IsDefined()) {
                 optimizeIntrinsics = config["optimize_intrinsics"].as<bool>();
@@ -86,17 +81,24 @@ namespace static_calibration {
                 logOptimization = config["log_optimization"].as<bool>();
             }
 
-            ParsedOptions parsedOptions{
-                    objectsFile,
-                    pixelsFile,
-                    measurementPoint,
-                    cameraName,
-                    evaluationBackgroundFrame,
-                    evaluationRuns,
-                    intrinsics,
-                    optimizeIntrinsics,
-                    logOptimization
-            };
+            ParsedOptions parsedOptions;
+            try {
+                parsedOptions = ParsedOptions{
+                        config["objects_file"].as<std::string>(),
+                        config["pixels_file"].as<std::string>(),
+                        config["lane_samples_file"].as<std::string>(),
+                        config["explicit_road_marks_file"].as<std::string>(),
+                        config["measurement_point"].as<std::string>(),
+                        config["camera_name"].as<std::string>(),
+                        evaluationBackgroundFrame,
+                        evaluationRuns,
+                        config["intrinsics"].as<std::vector<double>>(),
+                        optimizeIntrinsics,
+                        logOptimization
+                };
+            } catch (const YAML::BadConversion &e) {
+                throw std::invalid_argument("Couldn't parse the config file. Please see the Readme.md");
+            }
 
             return parsedOptions;
         }

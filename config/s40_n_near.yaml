@@ -1,6 +1,8 @@
 measurement_point: "s40"
 camera_name: "n_cam_near"
-objects_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_4/2021-06-02_1490_Providentia_Plus_Plus_1_4.yaml"
+objects_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_6/2021-06-02_1490_Providentia_Plus_Plus_1_6.xodr_objects.yaml"
+lane_samples_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_6/2021-06-02_1490_Providentia_Plus_Plus_1_6.xodr_lane_samples.yaml"
+explicit_road_marks_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_6/2021-06-02_1490_Providentia_Plus_Plus_1_6.xodr_explicit_road_marks.yaml"
 pixels_file: "/mnt/local_data/providentia/static_calibration/s40/n/near/frame.bmp_result.yaml"
 background_frame: "/mnt/local_data/providentia/static_calibration/s40/n/near/frame.bmp"
 intrinsics: [ 2788.860717, 2783.312609, 907.839058, 589.071478 ]
