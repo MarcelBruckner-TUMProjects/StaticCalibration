@@ -128,10 +128,6 @@ int main(int argc, char const *argv[]) {
     int run = -1;
     int maxRuns = parsedOptions.evaluationRuns;
 
-#ifdef WITH_COVERAGE
-    maxRuns = 1;
-#endif //WITH_COVERAGE
-
     for (int i = 0;; ++i) {
         if (estimator->isEstimationFinished()) {
             if (run >= 0) {
@@ -196,7 +192,7 @@ render(cv::Mat &finalFrame, const std::string &id, const Eigen::Vector3d &object
     Eigen::Vector4d vectorInCameraSpace = static_calibration::camera::toCameraSpace(
             translation.data(), rotation.data(), object.data());
 
-    if (std::abs(vectorInCameraSpace.z()) > 2000) {
+    if (std::abs(vectorInCameraSpace.z()) > 1000) {
         return;
     }
 

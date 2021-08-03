@@ -16,10 +16,3 @@ include_directories(${PROJECT_SOURCE_DIR}/extern)
 add_executable(StaticCalibration StaticCalibration.cpp)
 target_link_libraries(StaticCalibration StaticCalibration-lib Eigen3::Eigen yaml-cpp)
 target_include_directories(StaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")
-#
-#if (WITH_COVERAGE)
-#    setup_target_for_coverage_gcovr_xml(
-#            NAME StaticCalibration_coverage
-#            EXECUTABLE StaticCalibration -j ${PROCESSOR_COUNT}
-#    )
-#endif ()

@@ -65,22 +65,64 @@ cmake --build . -j8
 
 -DWITH_OPENCV=ON/OFF    # Build with OpenCV. 
                         # Set to ON to render the projected world objects during optimization. 
+```
 
+### Configuration
+
+You have to create a `<config>.yaml` file to provide the necessary parameters to the static calibration program.
+
+See `config/` for examples.
+
+```yaml
+# The name of the measurement point, i.e. the gantry bridge
+measurement_point: <string>
+
+# The name of the camera at the given measurement point
+camera_name: <string>
+
+# The absolute or relative path to the file containing the objects
+# The objects need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# To create the objects file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
+objects_file: <string>
+
+# The absolute or relative path to the file containing the marked pixels
+# To create the pixels file from a keyframe extracted from a video visit: https://github.com/Brucknem/DataAnnotationTools
+pixels_file: <string>
+
+# [Optional] Only used when compiled with -DWITH_OPENCV=ON
+# The absolute or relative path to the file containing the background frame, used during evaluation
+background_frame: <string>
+
+# The intrinsic camera parameters according to the pinhole camera model
+# All parameters need to be in pixels (except for skew)
+# To get information about the used pinhole camera model please visit: https://en.wikipedia.org/wiki/Pinhole_camera_model
+intrinsics:
+  - <double>  # The focal length along the horizontal axis 
+  - <double>  # The focal length along the vertical axis
+  - <double>  # The principal point coordinate along the horizontal axis
+  - <double>  # The principal point coordinate along the vertical axis
+  - <double>  # [Optional] The skew, defaults to 0
+
+# [Optional] Optimize intrinsic camera parameters together with the extrinsics, defaults to False
+optimize_intrinsics: <True | False>
+
+# [Optional] Number of runs during evaluation, defaults to 10
+evaluation_runs: <integer>
+
+# [Optional] Log the optimization progress, defaults to True
+log_optimization: <True | False>
 ```
 
 ### Running
 
 ```shell
-./app/StaticCalibration -h    # Prints the help message.
-                              # See it for the required input data and further usage.
-
+./app/StaticCalibration --config <path_to_config_file>
 ```
 
 ### Evaluating
 
 ```shell
-./evaluate/EvaluateStaticCalibration -h   # Prints the help message.
-                                          # See it for the required input data and further usage.
+./evaluate/EvaluateStaticCalibration --config <path_to_config_file>
 ```
 
 ### Testing

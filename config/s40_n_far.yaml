@@ -1,0 +1,9 @@
+measurement_point: "s40"
+camera_name: "s_cam_far"
+objects_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_4/2021-06-02_1490_Providentia_Plus_Plus_1_4.yaml"
+pixels_file: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.bmp_result.yaml"
+background_frame: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.bmp"
+intrinsics: [ 9023.482825, 9014.504360, 1222.314303, 557.541182 ]
+optimize_intrinsics: False
+evaluation_runs: 10
+log_optimization: True
