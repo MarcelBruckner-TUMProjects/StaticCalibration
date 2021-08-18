@@ -11,7 +11,9 @@
 #include "CMakeConfig.h"
 
 #ifdef WITH_OPENCV
+
 #include "opencv2/opencv.hpp"
+
 #endif //WITH_OPENCV
 
 namespace static_calibration {
@@ -119,30 +121,6 @@ namespace static_calibration {
         Eigen::Matrix<T, 2, 1>
         render(const T *translation, const T *rotation, const T *intrinsics, const T *vector, bool &flipped);
 
-#ifdef WITH_OPENCV
-        /**
-         * Renders the given vector with the given color to the given image.
-         *
-         * @tparam T double or ceres::Jet
-         * @param translation The [x, y, z] translation of the camera in world space.
-         * @param rotation The [x, y, z] euler angle rotation of the camera around the world axis.
-         * @param intrinsics [focalLength, sensorWidth, sensorHeight, principalX, principalY, skew]
-         * @param vector The [x, y, z, w] vector in world space.
-         * @param color The color that is assigned to the expectedPixel.
-         * @param image The image to which the expectedPixel will rendered.
-         */
-        Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                                           const std::vector<double> &intrinsics,
-                                           const Eigen::Vector4d &vector, const cv::Vec3d
-                                           &color,
-                                           cv::Mat &image, bool &flipped);
-        Eigen::Matrix<double, 2, 1> render(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                                           const std::vector<double> &intrinsics,
-                                           const Eigen::Vector4d &vector, const cv::Vec3d
-                                           &color,
-                                           cv::Mat &image);
-
-#endif //WITH_OPENCV
     }
 }
 #endif //CAMERASTABILIZATION_RENDERINGPIPELINE_HPP

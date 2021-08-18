@@ -15,7 +15,7 @@ add_executable(Tests
         RenderingPipelineTests.cpp
         CameraPoseEstimationTests.cpp
         ResidualsTests.cpp
-        ObjectsLoadingTests.cpp
+        DataSetTests.cpp
         )
 target_link_libraries(Tests
         PUBLIC StaticCalibration-lib

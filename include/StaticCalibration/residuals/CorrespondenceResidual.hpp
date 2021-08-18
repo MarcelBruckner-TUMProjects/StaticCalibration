@@ -48,7 +48,6 @@ namespace static_calibration {
                  * @param translation The [x, y, z] translation of the camera in world space for which we optimize.
                  * @param rotation The [x, y, z] euler angle rotation of the camera around the world axis for which we optimize.
                  * @param lambda The [l] distance of the point in the direction of one side of the parametricPoint from the origin.
-                 * @param mu The [m] distance of the point in the direction of another side of the parametricPoint from the origin.
                  * @param residual The [u, v] pixel error between the expected and calculated pixel.
                  * @return true
                  */
@@ -61,7 +60,6 @@ namespace static_calibration {
                         const T *ry,
                         const T *rz,
                         const T *lambda,
-                        const T *mu,
                         const T *weight,
                         T *residual)
                 const;

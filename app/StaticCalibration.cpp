@@ -3,7 +3,7 @@
 //
 
 #include <thread>
-#include "StaticCalibration/objects/ObjectsLoading.hpp"
+#include "StaticCalibration/objects/DataSet.hpp"
 #include "StaticCalibration/CameraPoseEstimationWithIntrinsics.hpp"
 
 #include "glog/logging.h"
@@ -16,8 +16,11 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-//    auto origin = static_calibration::calibration::getOrigin(parsedOptions.objectsFile, "4007847");
-    auto objects = static_calibration::calibration::loadObjects(parsedOptions.objectsFile, parsedOptions.pixelsFile);
+    auto objects = static_calibration::calibration::loadObjects<static_calibration::calibration::WorldObject>(
+            parsedOptions.objectsFile);
+
+    auto imageObjects = static_calibration::calibration::loadObjects<static_calibration::calibration::ImageObject>(
+            parsedOptions.pixelsFile);
 
     static_calibration::calibration::CameraPoseEstimationWithIntrinsics estimator(parsedOptions.intrinsics);
 //    estimator.fixIntrinsics(true);

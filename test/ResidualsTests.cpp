@@ -39,7 +39,7 @@ namespace static_calibration {
                         &intrinsics[3],
                         &translation.x(), &translation.y(), &translation.z(),
                         &rotation.x(), &rotation.y(), &rotation.z(),
-                        point.getLambda(), point.getMu(), new double(1), residual.data());
+                        point.getLambda(), new double(1), residual.data());
 
                 EXPECT_NEAR(residual.x(), expectedResidual.x(), 1e-6);
                 EXPECT_NEAR(residual.y(), expectedResidual.y(), 1e-6);
@@ -51,7 +51,7 @@ namespace static_calibration {
              */
             void assertPointCorrespondenceResidual(const Eigen::Vector3d &worldPosition, const Eigen::Vector2d &pixel,
                                                    Eigen::Vector2d expectedResidual) {
-                assertParametricPoint(static_calibration::calibration::ParametricPoint::onPoint(pixel, worldPosition),
+                assertParametricPoint(static_calibration::calibration::ParametricPoint(pixel, worldPosition),
                                       std::move(expectedResidual));
             }
 
@@ -62,23 +62,10 @@ namespace static_calibration {
             void assertLineCorrespondenceResidual(Eigen::Vector3d lineOrigin, const Eigen::Vector3d &lineHeading, double
             lambda, const Eigen::Vector2d &pixel, const Eigen::Vector2d &expectedResidual) {
                 assertParametricPoint(
-                        static_calibration::calibration::ParametricPoint::onLine(pixel, std::move(lineOrigin),
-                                                                                 lineHeading,
-                                                                                 lambda),
+                        static_calibration::calibration::ParametricPoint(pixel, std::move(lineOrigin),
+                                                                         lineHeading,
+                                                                         lambda, lambda, lambda),
                         expectedResidual);
-            }
-
-            /**
-             * Asserts that calculating projecting the world position to the image space results in the expected
-             * residual error.
-             */
-            void assertPlaneCorrespondenceResidual(Eigen::Vector3d planeOrigin, const Eigen::Vector3d &planeSideA,
-                                                   double lambda, const Eigen::Vector3d &planeSideB, double mu,
-                                                   const Eigen::Vector2d &pixel, Eigen::Vector2d expectedResidual) {
-                assertParametricPoint(static_calibration::calibration::ParametricPoint::onPlane(pixel, std::move
-                                                                                                        (planeOrigin), planeSideA, planeSideB,
-                                                                                                lambda, mu),
-                                      std::move(expectedResidual));
             }
         };
 
@@ -131,34 +118,6 @@ namespace static_calibration {
             assertLineCorrespondenceResidual(lineOrigin, lineHeading, lambda, pixel, {0, 0});
         }
 
-        /**
-         * Tests the parametricPoint correspondence residual calculation.
-         */
-        TEST_F(ResidualsTests, testPlaneCorrespondence) {
-            Eigen::Vector3d planeOrigin{0, 0, 0};
-
-            Eigen::Vector3d planeSideA{1, 0, 0};
-            Eigen::Vector3d planeSideB{0, 0, 1};
-
-            Eigen::Vector2d pixel{960, 0};
-            double lambda = 0;
-            double mu = 0;
-
-            assertPlaneCorrespondenceResidual(planeOrigin, planeSideA, lambda, planeSideB, mu, pixel, {0, 0});
-
-            lambda = -8;
-            pixel << 0, 0;
-            assertPlaneCorrespondenceResidual(planeOrigin, planeSideA, lambda, planeSideB, mu, pixel, {0, 0});
-
-            lambda = 8;
-            mu = 10;
-            assertPlaneCorrespondenceResidual(planeOrigin, planeSideA, lambda, planeSideB, mu, pixel, {-1920, -1200});
-
-            lambda = 8;
-            mu = 10;
-            pixel << 1920, 1200;
-            assertPlaneCorrespondenceResidual(planeOrigin, planeSideA, lambda, planeSideB, mu, pixel, {0, 0});
-        }
     }
 }
 

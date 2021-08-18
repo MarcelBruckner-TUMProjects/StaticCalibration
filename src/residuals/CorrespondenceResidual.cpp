@@ -27,12 +27,10 @@ namespace static_calibration {
                     const T *ry,
                     const T *rz,
                     const T *lambda,
-                    const T *mu,
                     const T *weight,
                     T *residual) const {
                 Eigen::Matrix<T, 3, 1> point = parametricPoint.getOrigin().cast<T>();
                 point += parametricPoint.getAxisA().cast<T>() * lambda[0];
-                point += parametricPoint.getAxisB().cast<T>() * mu[0];
 
                 Eigen::Matrix<T, 2, 1> actualPixel;
                 bool flipped;
@@ -57,7 +55,7 @@ namespace static_calibration {
             ceres::CostFunction *
             CorrespondenceResidual::create(const Eigen::Matrix<double, 2, 1> &expectedPixel,
                                            const ParametricPoint &point, const std::vector<double> &intrinsics) {
-                return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1>(
+                return new ceres::AutoDiffCostFunction<CorrespondenceResidual, 2, 1, 1, 1, 1, 1, 1, 1, 1>(
                         new CorrespondenceResidual(expectedPixel, point, intrinsics),
                         ceres::TAKE_OWNERSHIP
                 );

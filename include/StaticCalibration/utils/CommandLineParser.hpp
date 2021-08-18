@@ -66,6 +66,9 @@ namespace static_calibration {
              */
             std::vector<double> intrinsics;
 
+            std::vector<double> translation;
+            std::vector<double> rotation;
+
             /**
              * Flag if intrinsics should be optimized.
              */

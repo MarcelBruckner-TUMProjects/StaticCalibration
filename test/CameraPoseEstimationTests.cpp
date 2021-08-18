@@ -2,6 +2,7 @@
 #include <iostream>
 #include <utility>
 #include <StaticCalibration/CameraPoseEstimation.hpp>
+#include <StaticCalibration/objects/DataSet.hpp>
 
 #include "CameraTestBase.hpp"
 #include "StaticCalibration/CameraPoseEstimationWithIntrinsics.hpp"
@@ -18,6 +19,10 @@ namespace static_calibration {
         class CameraPoseEstimationTests : public CameraTestBase {
         protected:
 
+            int log = 0;
+
+            static_calibration::objects::DataSet dataSet;
+
             std::shared_ptr<static_calibration::calibration::CameraPoseEstimationBase> estimator;
 
             /**
@@ -27,6 +32,10 @@ namespace static_calibration {
 
             static void SetUpTestCase() {
                 google::InitGoogleLogging("Camera Pose Estimation");
+            }
+
+            void TearDown() override {
+                dataSet.clear();
             }
 
             Eigen::Vector2d getPixel(const static_calibration::calibration::ParametricPoint &object) {
@@ -40,25 +49,25 @@ namespace static_calibration {
                         vector.data());
             }
 
-            void addPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace) {
-                WorldObject worldObject(static_calibration::calibration::ParametricPoint::onPoint(getPixel
-                                                                                                          (pointInWorldSpace),
-                                                                                                  pointInWorldSpace));
-                estimator->addWorldObject(worldObject);
+            void addPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace, const std::string &id) {
+                WorldObject worldObject(id, pointInWorldSpace, {0, 0, 0}, 0);
+                ImageObject imageObject(id, {getPixel(worldObject.getOrigin())});
+                dataSet.add(worldObject, imageObject);
             }
 
             void addSomePointCorrespondences() {
-                addPointCorrespondence({0, 0, 5});
-                addPointCorrespondence({0, 10, 5});
-                addPointCorrespondence({0, 30, 5});
-                addPointCorrespondence({0, 50, 5});
-                addPointCorrespondence({0, 70, 5});
+                addPointCorrespondence({0, 0, 5}, "a");
+                addPointCorrespondence({0, 10, 5}, "b");
+                addPointCorrespondence({0, 30, 5}, "c");
+                addPointCorrespondence({0, 50, 5}, "d");
+                addPointCorrespondence({0, 70, 5}, "e");
 
-                addPointCorrespondence({4, 10, 0});
-                addPointCorrespondence({-1, 30, -3});
+                addPointCorrespondence({4, 10, 0}, "f");
+                addPointCorrespondence({-1, 30, -3}, "g");
+                estimator->setDataSet(dataSet);
             }
 
-            void assertEstimation(int log = 0, double maxDifference = 1e-8) {
+            void assertEstimation(double maxDifference = 1e-8) {
                 estimator->estimate(log > 0);
 //				estimator->getLambdas();
                 assertVectorsNearEqual(estimator->getTranslation(), translation, maxDifference);
@@ -71,59 +80,40 @@ namespace static_calibration {
                     std::cout << estimator->getRotation() << std::endl;
 
                     std::cout << "World worldObjects" << std::endl;
-                    for (const auto &worldObject : estimator->getWorldObjects()) {
-                        std::cout << "Next world object" << std::endl;
-                        for (const auto &point : worldObject.getPoints()) {
-                            std::cout << point.getPosition() << std::endl << std::endl;
-                        }
+
+                    for (const auto &point : estimator->getDataSet().getParametricPoints()) {
+                        std::cout << point.getPosition() << std::endl << std::endl;
                     }
                 }
             }
 
-            void addPost(const Eigen::Vector3d &origin) {
+            void addPost(const Eigen::Vector3d &origin, std::string id) {
                 int number = 5;
                 double height = 1.5;
-                WorldObject post;
-                post.setHeight(height);
+                Eigen::Vector3d axis = Eigen::Vector3d::UnitZ();
+                WorldObject postObject(id, origin, axis, height);
+                ImageObject postImageObject(id);
+
                 for (int i = 0; i < number; ++i) {
                     for (int w = -4; w <= 4; w += 2) {
-                        ParametricPoint point = static_calibration::calibration::ParametricPoint::onLine(origin,
-                                                                                                         {0, 0, 1},
-                                                                                                         (height /
-                                                                                                          number) *
-                                                                                                         i);
-                        auto pixel = getPixel(point);
-                        point.setExpectedPixel(pixel + Eigen::Vector2d{w, 0});
-                        *point.getLambda() = 0;
-                        post.add(point);
+                        postImageObject.addPixel(getPixel(origin + axis * (height / number) * i));
                     }
                 }
-                post.calculateCenterLine();
-                estimator->addWorldObject(post);
+                dataSet.add(postObject, postImageObject);
             }
 
 
-            void addLane(const Eigen::Vector3d &origin, const Eigen::Vector3d &direction) {
+            void addLane(const Eigen::Vector3d &origin, const Eigen::Vector3d &end, std::string id) {
                 int number = 10;
-                double height = 0;
-                WorldObject lane;
-                lane.setHeight(height);
-                for (int i = 0; i < number; ++i) {
-                    ParametricPoint point = static_calibration::calibration::ParametricPoint::onLine(origin, direction,
-                                                                                                     i * 10);
-                    auto position = point.getPosition();
-//                    std::cout << position << std::endl;
-                    Eigen::Vector2d pixel = getPixel(point);
-//                    std::cout << pixel << std::endl;
-                    point.setExpectedPixel(pixel);
-                    lane.add(point);
-//                    for (int w = -4; w <= 4; w += 2) {
-//                        point.setExpectedPixel(pixel + Eigen::Vector2d{w, 0});
-//                        *point.getLambda() = 0;
-//                    }
+                WorldObject laneObject(id, origin, end);
+                ImageObject laneImageObject(id);
+
+                for (int i = 0; i <= number; i++) {
+                    Eigen::Vector3d point = origin + (laneObject.getLength() / 10. * i) * laneObject.getAxisA();
+                    laneImageObject.addPixel(getPixel(point));
                 }
-                lane.calculateCenterLine();
-                estimator->addWorldObject(lane);
+
+                dataSet.add(laneObject, laneImageObject);
             }
         };
 
@@ -134,13 +124,14 @@ namespace static_calibration {
             estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimationWithIntrinsics>(
                     intrinsics);
 
-            addPointCorrespondence({0, 0, 9});
-            addPointCorrespondence({0, 0, -9});
-            addPointCorrespondence({0, 9, 0});
-            addPointCorrespondence({0, -9, 0});
-            addPointCorrespondence({9, 0, 0});
-            addPointCorrespondence({-9, 0, 0});
+            addPointCorrespondence({0, 0, 9}, "a");
+            addPointCorrespondence({0, 0, -9}, "b");
+            addPointCorrespondence({0, 9, 0}, "c");
+            addPointCorrespondence({0, -9, 0}, "d");
+            addPointCorrespondence({9, 0, 0}, "e");
+            addPointCorrespondence({-9, 0, 0}, "f");
 
+            estimator->setDataSet(dataSet);
             estimator->calculateInitialGuess();
 
             assertVectorsNearEqual(estimator->getTranslation(), Eigen::Vector3d{0, 0, 500});
@@ -160,7 +151,7 @@ namespace static_calibration {
 
 
         /**
-         * Tests that the optimization converges to the expected extrinsic parameters.
+         * Tests that the rotational parameters are in the interval [-180, 180]
          */
         TEST_F(CameraPoseEstimationTests, testRotationInPlusMinus180) {
             assertVectorsNearEqual(
@@ -186,19 +177,12 @@ namespace static_calibration {
         TEST_F(CameraPoseEstimationTests, testEstimationOnlyPosts) {
             estimator = std::make_shared<static_calibration::calibration::CameraPoseEstimation>(intrinsics);
 
-            Eigen::Vector3d origin, axisA, axisB;
-            origin << 0, 0, 0;
-            axisA << 1, 0, 0;
-            axisB << 0, 1, 0;
+            addPost({15, 4, 8}, "a");
+            addPost({-2, 17, 0}, "b");
+            addLane({-10, 0, 0}, {-10, 10, 0}, "c");
 
-            addPost({15, 4, 8});
-            addPost({-2, 17, 0});
-
-            addLane({-10, 0, 0}, {0, 1, 0});
-
-            estimator->guessTranslation({0, -50, 0});
-            estimator->guessRotation({80, 10, -10});
-            assertEstimation(1, 1e-5);
+            estimator->setDataSet(dataSet);
+            assertEstimation(1e-5);
         }
     }// namespace toCameraSpace
 }// namespace static_calibration

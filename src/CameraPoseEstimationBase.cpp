@@ -59,10 +59,11 @@ namespace static_calibration {
 
         Eigen::Vector3d CameraPoseEstimationBase::calculateMean() {
             Eigen::Vector3d meanVector(0, 0, 0);
-            for (const auto &worldObject : worldObjects) {
-                meanVector += worldObject.getMean();
+            auto &parametricPoints = dataSet.getParametricPoints();
+            for (const auto &worldObject : parametricPoints) {
+                meanVector += worldObject.getOrigin();
             }
-            return meanVector / worldObjects.size();
+            return meanVector / parametricPoints.size();
         }
 
         std::thread CameraPoseEstimationBase::estimateAsync(bool logSummary) {
@@ -85,13 +86,16 @@ namespace static_calibration {
 
         std::vector<double> CameraPoseEstimationBase::getLambdas() {
             std::vector<double> lambdas;
-            for (const auto &worldObject : worldObjects) {
-                std::cout << "World Object: " << worldObject.getId() << std::endl;
-                for (const auto &point : worldObject.getCenterLine()) {
-                    std::cout << *point.getLambda() << " / " << worldObject.getHeight() << std::endl;
-                    lambdas.emplace_back(*point.getLambda());
-                }
-            }
+            throw std::logic_error("Not implemented");
+
+//            for (const auto &worldObject : worldObjects) {
+//                std::cout << "World Object: " << worldObject.getId() << std::endl;
+//             TODO fix add lambdas
+//                for (const auto &point : worldObject.getCenterLine()) {
+//                    std::cout << *point.getLambda() << " / " << worldObject.getLength() << std::endl;
+//                    lambdas.emplace_back(*point.getLambda());
+//                }
+//            }
             return lambdas;
         }
 
@@ -158,11 +162,8 @@ namespace static_calibration {
         }
 
         void CameraPoseEstimationBase::resetParameters() {
-            for (auto &worldObject : worldObjects) {
-                for (const auto &point : worldObject.getCenterLine()) {
-                    *point.getLambda() = 0;
-                    *point.getMu() = 0;
-                }
+            for (const auto &point : dataSet.getParametricPoints()) {
+                *point.getLambda() = 0;
             }
         }
 
@@ -178,17 +179,13 @@ namespace static_calibration {
             weightResiduals.clear();
             lambdaResiduals.clear();
 
-            for (auto &worldObject : worldObjects) {
-                double height = worldObject.getHeight();
-                for (const auto &point : worldObject.getCenterLine()) {
-                    weights.emplace_back(new double(1));
-                    correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
-                    if (height > 0) {
-                        lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point, height));
-                    }
-                    weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
-                }
+            for (const auto &point : dataSet.getParametricPoints()) {
+                weights.emplace_back(new double(1));
+                correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
+                lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
+                weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
             }
+
             addRotationConstraints(problem);
 
 //			std::cout << "Residuals: " << problem.NumResidualBlocks() << std::endl;
@@ -205,10 +202,9 @@ namespace static_calibration {
         }
 
         ceres::ResidualBlockId
-        CameraPoseEstimationBase::addLambdaResidualBlock(ceres::Problem &problem, const ParametricPoint &point,
-                                                         double height) const {
+        CameraPoseEstimationBase::addLambdaResidualBlock(ceres::Problem &problem, const ParametricPoint &point) const {
             return problem.AddResidualBlock(
-                    residuals::DistanceFromIntervalResidual::create(height),
+                    residuals::DistanceFromIntervalResidual::create(point.getLambdaMin(), point.getLambdaMax()),
                     getScaledHuberLoss(lambdaResidualScalingFactor),
                     point.getLambda()
             );
@@ -239,21 +235,6 @@ namespace static_calibration {
             initialTranslation = value;
             translation = value;
             initialDistanceFromMean = 0;
-        }
-
-        void CameraPoseEstimationBase::addWorldObject(const WorldObject &worldObject) {
-            worldObjects.emplace_back(worldObject);
-        }
-
-        void CameraPoseEstimationBase::addWorldObjects(const std::vector<WorldObject> &vector) {
-            for (const auto &worldObject : vector) {
-                addWorldObject(worldObject);
-            }
-        }
-
-        const std::vector<static_calibration::calibration::WorldObject> &
-        CameraPoseEstimationBase::getWorldObjects() const {
-            return worldObjects;
         }
 
         bool CameraPoseEstimationBase::isEstimationFinished() const {
@@ -300,10 +281,6 @@ namespace static_calibration {
 
         void CameraPoseEstimationBase::setWeightPenalizeScale(double value) {
             weightResidualScalingFactor = value;
-        }
-
-        void CameraPoseEstimationBase::clearWorldObjects() {
-            worldObjects.clear();
         }
 
         std::vector<double> CameraPoseEstimationBase::getWeights() {
@@ -401,6 +378,13 @@ namespace static_calibration {
             return (int) weightResiduals.size();
         }
 
+        const objects::DataSet &CameraPoseEstimationBase::getDataSet() const {
+            return dataSet;
+        }
+
+        void CameraPoseEstimationBase::setDataSet(const objects::DataSet &dataSet) {
+            CameraPoseEstimationBase::dataSet = dataSet;
+        }
 
         std::string printVectorRow(std::vector<double> vector) {
             std::stringstream ss;

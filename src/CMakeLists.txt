@@ -37,12 +37,13 @@ add_library(StaticCalibration-lib
 
         objects/ParametricPoint.cpp
         objects/WorldObject.cpp
-        objects/ObjectsLoading.cpp
         objects/YAMLExtension.cpp
 
         utils/CommandLineParser.cpp
         utils/Formatters.cpp
-        )
+        utils/RenderUtils.cpp
+        objects/ImageObject.cpp
+        objects/DataSet.cpp)
 
 target_include_directories(StaticCalibration-lib
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

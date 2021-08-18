@@ -10,6 +10,7 @@
 #include <iostream>
 #include <thread>
 #include <limits>
+#include <StaticCalibration/objects/DataSet.hpp>
 #include "yaml-cpp/yaml.h"
 #include "tinyxml2.h"
 
@@ -88,9 +89,9 @@ namespace static_calibration {
             Eigen::Vector3d initialRotation;
 
             /**
-             * A buffer for the known world worldObjects.
+             * The dataset of known 3D world objects and 2D image objects.
              */
-            std::vector<static_calibration::calibration::WorldObject> worldObjects;
+            static_calibration::objects::DataSet dataSet;
 
             /**
              * Flag if an initial guess for the rotation was set.
@@ -267,12 +268,12 @@ namespace static_calibration {
              *
              * @param problem The ceres problem
              * @param point The point used in the residual block.
-             * @param height The height of the world object.
+             * @param lambdaMin The height of the world object.
              *
              * @return The residual block id.
              */
             ceres::ResidualBlockId
-            addLambdaResidualBlock(ceres::Problem &problem, const ParametricPoint &point, double height) const;
+            addLambdaResidualBlock(ceres::Problem &problem, const ParametricPoint &point) const;
 
             /**
              * Adds a lambda residual block based on the given point to the problem.
@@ -338,12 +339,12 @@ namespace static_calibration {
             std::vector<double> initialIntrinsics;
 
             /**
-                 * Creates a ceres loss function based on the huber loss with additional scaling.
-                 *
-                 * @param scale The additional scaling.
-                 *
-                 * @return The loss function
-                 */
+             * Creates a ceres loss function based on the huber loss with additional scaling.
+             *
+             * @param scale The additional scaling.
+             *
+             * @return The loss function
+             */
             static ceres::ScaledLoss *getScaledHuberLoss(double scale);
 
         public:
@@ -359,27 +360,17 @@ namespace static_calibration {
              */
             virtual ~CameraPoseEstimationBase() = default;
 
-            /**
-             * Adds the given world object to the list of world objects used during the pose estimation.
-             *
-             * @param worldObject The object
-             */
-            void addWorldObject(const WorldObject &worldObject);
+            const objects::DataSet &getDataSet() const;
+
+            void setDataSet(const objects::DataSet &dataSet);
 
             /**
-             * Adds the given world objects to the list of world objects used during the pose estimation.
-             *
-             * @param vector The objects
-             */
-            void addWorldObjects(const std::vector<WorldObject> &vector);
-
-            virtual /**
              * Estimates the camera translation and rotation based on the known correspondences between the world and
              * image.
              *
              * @param logSummary Flag to log the ceres summary output to stdout.
              */
-            void estimate(bool logSummary);
+            virtual void estimate(bool logSummary);
 
             /**
              * Async threaded wrapper for the pose estimation function.
@@ -508,6 +499,7 @@ namespace static_calibration {
              * @get
              */
             int getCorrespondenceLossUpperBound() const;
+
         };
     }
 }

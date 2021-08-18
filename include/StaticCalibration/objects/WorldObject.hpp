@@ -7,111 +7,92 @@
 
 #include "Eigen/Dense"
 #include "ParametricPoint.hpp"
+#include "ImageObject.hpp"
 #include <vector>
 #include <memory>
 
 namespace static_calibration {
-	namespace calibration {
+    namespace calibration {
 
-		/**
-		 * A world object containing of a set of points.
-		 */
-		class WorldObject {
-		private:
-			/**
-			 * The
-			 */
-			std::vector<ParametricPoint> points;
+        /**
+         * A world object containing of a set of points.
+         */
+        class WorldObject {
+        private:
 
-			std::vector<ParametricPoint> centerLine;
+            /**
+             * The origin of the world object.
+             */
+            Eigen::Vector3d origin;
 
-			/**
-			 * An optional id.
-			 */
-			std::string id;
+            /**
+             * One axis of the world object.
+             */
+            Eigen::Vector3d axis;
 
-			/**
-			 * The height of the object in meters.
-			 */
-			double height = 0;
+            /**
+             * An optional id.
+             */
+            std::string id;
 
-		public:
+            /**
+             * The length of the object in axisA.
+             */
+            double length = 0;
 
-			/**
-			 * @constructor
-			 */
-			explicit WorldObject() = default;
+            std::vector<ParametricPoint> parametricPoints;
 
-			/**
-			 * @constructor
-			 *
-			 * @param point Initializes the object with the given point.
-			 */
-			explicit WorldObject(const ParametricPoint &point);
+        public:
 
-			/**
-			 * @destructor
-			 */
-			virtual ~WorldObject() = default;
+            /**
+             * @constructor
+             */
+            WorldObject(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &axisA,
+                        double length);
 
-			/**
-			 * Adds the given point to the object.
-			 */
-			void add(const ParametricPoint &point);
+            /**
+             * @constructor
+             */
+            WorldObject(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &end);
 
-			/**
-			 * The inverse number of points.
-			 */
-			double getWeight() const;
+            /**
+             * @destructor
+             */
+            virtual ~WorldObject() = default;
 
-			/**
-			 * @get
-			 */
-			const std::vector<ParametricPoint> &getPoints() const;
+            /**
+             * @get
+             */
+            const std::string &getId() const;
 
-			/**
-			 * @get
-			 */
-			std::vector<ParametricPoint> getPointsWithPixel() const;
+            /**
+             * @set
+             */
+            void setId(const std::string &id);
 
-			/**
-			 * @get
-			 */
-			void calculateCenterLine();
+            /**
+             * @get
+             */
+            double getLength() const;
 
-			const std::vector<ParametricPoint> &getCenterLine() const;
+            /**
+             * @set
+             */
+            void setLength(double length);
 
-			/**
-			 * @get The mean of the points.
-			 */
-			Eigen::Vector3d getMean() const;
+            const Eigen::Vector3d &getOrigin() const;
 
-			/**
-			 * @get
-			 */
-			const std::string &getId() const;
+            const Eigen::Vector3d &getAxisA() const;
 
-			/**
-			 * @set
-			 */
-			void setId(const std::string &id);
+            const Eigen::Vector3d &getAxisB() const;
 
-			/**
-			 * @get
-			 */
-			double getHeight() const;
+            double getLengthB() const;
 
-			/**
-			 * @set
-			 */
-			void setHeight(double height);
+            Eigen::Vector3d getEndAxisA() const;
 
-			/**
-			 * @get
-			 */
-			int getNumPoints() const;
-		};
-	}
+            Eigen::Vector3d getEndAxisB() const;
+        };
+    }
 }
 
 #endif //CAMERASTABILIZATION_WORLDOBJECT_HPP

@@ -4,6 +4,7 @@
 #include "StaticCalibration/utils/Formatters.hpp"
 
 #include <iomanip>
+#include <StaticCalibration/utils/RenderUtils.hpp>
 
 namespace static_calibration {
     namespace utils {
@@ -65,16 +66,16 @@ namespace static_calibration {
             pushArg(printer, "frame_mp_cam", child.c_str());
 
             printer.PushComment("Translations");
-            auto translation = estimator.getTranslation();
-            pushArg(printer, "translation_x", translation.y());
-            pushArg(printer, "translation_y", -translation.x());
+            auto translation = static_calibration::utils::translationToROStf2(estimator.getTranslation());
+            pushArg(printer, "translation_x", translation.x());
+            pushArg(printer, "translation_y", translation.y());
             pushArg(printer, "translation_z", translation.z());
 
             printer.PushComment("Rotations");
-            auto rotation = estimator.getRotation();
-            pushArg(printer, "yaw", rotation.z());
-            pushArg(printer, "pitch", 90. - rotation.x());
-            pushArg(printer, "roll", rotation.y());
+            auto rotation = static_calibration::utils::rotationToROStf2(estimator.getRotation());
+            pushArg(printer, "yaw", rotation.x());
+            pushArg(printer, "pitch", rotation.y());
+            pushArg(printer, "roll", rotation.z());
             pushArg(printer, "yaw_rad", "$(eval yaw * pi / 180.)");
             pushArg(printer, "pitch_rad", "$(eval pitch * pi / 180.)");
             pushArg(printer, "roll_rad", "$(eval roll * pi / 180.)");

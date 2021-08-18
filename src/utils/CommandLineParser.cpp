@@ -16,6 +16,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
+#include <StaticCalibration/utils/RenderUtils.hpp>
 
 
 namespace static_calibration {
@@ -81,6 +82,21 @@ namespace static_calibration {
                 logOptimization = config["log_optimization"].as<bool>();
             }
 
+            std::vector<double> translation{0, 0, 0};
+            std::vector<double> rotation{0, 0, 0};
+
+            if (config["translation"].IsDefined()) {
+                translation = config["translation"].as<std::vector<double>>();
+            }
+            if (config["rotation"].IsDefined()) {
+                rotation = config["rotation"].as<std::vector<double>>();
+            }
+            if (config["ros_tf2_coordinates"].IsDefined() && config["ros_tf2_coordinates"].as<bool>()) {
+                translation = static_calibration::utils::translationToROStf2(translation, true);
+                rotation = static_calibration::utils::rotationToROStf2(rotation, true);
+            }
+
+
             ParsedOptions parsedOptions;
             try {
                 parsedOptions = ParsedOptions{
@@ -93,11 +109,14 @@ namespace static_calibration {
                         evaluationBackgroundFrame,
                         evaluationRuns,
                         config["intrinsics"].as<std::vector<double>>(),
+                        translation,
+                        rotation,
                         optimizeIntrinsics,
                         logOptimization
                 };
             } catch (const YAML::BadConversion &e) {
-                throw std::invalid_argument("Couldn't parse the config file. Please see the Readme.md");
+                throw std::invalid_argument(
+                        "Couldn't parse the config file. Please see the Readme.md\n" + std::string(e.what()));
             }
 
             return parsedOptions;

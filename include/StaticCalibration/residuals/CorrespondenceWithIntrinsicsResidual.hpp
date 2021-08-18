@@ -60,7 +60,6 @@ namespace static_calibration {
                         const T *ry,
                         const T *rz,
                         const T *lambda,
-                        const T *mu,
                         const T *weight,
                         T *residual)
                 const;

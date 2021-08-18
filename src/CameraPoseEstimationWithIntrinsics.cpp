@@ -51,7 +51,6 @@ namespace static_calibration {
                     &rotation.y(),
                     &rotation.z(),
                     point.getLambda(),
-                    point.getMu(),
                     weights[weights.size() - 1]
             );
         }

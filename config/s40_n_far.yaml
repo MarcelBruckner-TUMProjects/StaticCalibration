@@ -1,11 +1,14 @@
 measurement_point: "s40"
 camera_name: "s_cam_far"
-objects_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_4/2021-06-02_1490_Providentia_Plus_Plus_1_4.yaml"
-lane_samples_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_6/2021-06-02_1490_Providentia_Plus_Plus_1_6.xodr_lane_samples.yaml"
-explicit_road_marks_file: "/mnt/local_data/providentia/hd_map/NewMap/HiDrive/2021-06-02_1490_Providentia_Plus_Plus_1_6/2021-06-02_1490_Providentia_Plus_Plus_1_6.xodr_explicit_road_marks.yaml"
+objects_file: "/mnt/local_data/providentia/hd_map/NewMap/2021-07-07_1490_Providentia_Plus_Plus_1_6/2021-07-07_1490_Providentia_Plus_Plus_1_6.xodr_objects.yaml"
+lane_samples_file: "/mnt/local_data/providentia/hd_map/NewMap/2021-07-07_1490_Providentia_Plus_Plus_1_6/2021-07-07_1490_Providentia_Plus_Plus_1_6.xodr_lane_samples.yaml"
+explicit_road_marks_file: "/mnt/local_data/providentia/hd_map/NewMap/2021-07-07_1490_Providentia_Plus_Plus_1_6/2021-07-07_1490_Providentia_Plus_Plus_1_6.xodr_explicit_road_marks.yaml"
 pixels_file: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.bmp_result.yaml"
 background_frame: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.bmp"
 intrinsics: [ 9023.482825, 9014.504360, 1222.314303, 557.541182 ]
+ros_tf2_coordinates: true
+translation: [ -444.62679384269882, 117.6633265127147, 10.015564539146094 ]
+rotation: [ -20.777346474546256, 3.9869309010142331, 0.016366255535430613 ]
 optimize_intrinsics: False
 evaluation_runs: 10
 log_optimization: True
