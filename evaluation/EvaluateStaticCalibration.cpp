@@ -62,6 +62,10 @@ int main(int argc, char const *argv[]) {
         estimator = new static_calibration::calibration::CameraPoseEstimation(parsedOptions.intrinsics);
     }
 
+
+    estimator->guessTranslation(Eigen::Vector3d(parsedOptions.translation.data()));
+    estimator->guessRotation(Eigen::Vector3d(parsedOptions.rotation.data()));
+
     auto csvWriter = initCSVWriters();
 
 #ifdef WITH_OPENCV
@@ -107,8 +111,7 @@ int main(int argc, char const *argv[]) {
         intrinsics = estimator->getIntrinsics();
 
         finalFrame = evaluationFrame * 0.5;
-        static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), translation, rotation, intrinsics,
-                                          trackbarShowIds);
+        static_calibration::utils::render(finalFrame, dataSet, translation, rotation, intrinsics, trackbarShowIds);
         static_calibration::utils::renderText(finalFrame, estimator, run);
 
         cv::imshow(windowName, finalFrame);

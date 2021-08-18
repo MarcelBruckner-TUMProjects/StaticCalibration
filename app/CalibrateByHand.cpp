@@ -49,8 +49,7 @@ int main(int argc, char const *argv[]) {
         Eigen::Vector3d t{(translation[0] - 10000) / 10., (translation[1] - 10000) / 10., (translation[2] - 500) / 10.};
         Eigen::Vector3d r{(rotation[0] - 1800) / 10., (rotation[1] - 1800) / 10., (rotation[2] - 1800) / 10.};
 
-        static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), t, r, intrinsics, trackbarShowIds);
-        static_calibration::utils::render(finalFrame, dataSet.getImageObjects(), trackbarShowIds);
+        static_calibration::utils::render(finalFrame, dataSet, t, r, intrinsics, trackbarShowIds);
         static_calibration::utils::renderText(finalFrame, t, r, 0);
 
         cv::imshow(windowName, finalFrame);

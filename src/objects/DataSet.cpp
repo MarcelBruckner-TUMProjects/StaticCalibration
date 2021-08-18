@@ -96,13 +96,14 @@ namespace static_calibration {
         void DataSet::clear() {
             worldObjects.clear();
             imageObjects.clear();
+            mapping.clear();
         }
 
         void DataSet::add(const calibration::WorldObject &worldObject, const calibration::ImageObject &imageObject) {
             worldObjects.emplace_back(worldObject);
             imageObjects.emplace_back(imageObject);
             mapping[worldObject.getId()] = imageObject.getId();
-            merge();
+            merge(worldObjects.size() - 1, imageObjects.size() - 1);
         }
 
         DataSet::DataSet(const std::vector<static_calibration::calibration::WorldObject> &worldObjects,
@@ -124,6 +125,61 @@ namespace static_calibration {
 
         const std::vector<calibration::ParametricPoint> &DataSet::getParametricPoints() const {
             return parametricPoints;
+        }
+
+
+        template<>
+        int DataSet::get<calibration::WorldObject>(std::string id) const {
+            auto objectPtr = std::find_if(worldObjects.begin(), worldObjects.end(),
+                                          [&id](const calibration::WorldObject &element) {
+                                              return element.getId() == id;
+                                          });
+            int i = int(objectPtr - worldObjects.begin());
+            if (i >= worldObjects.size()) {
+                i = -1;
+            }
+            return i;
+        }
+
+        template<>
+        int DataSet::get<calibration::ImageObject>(std::string id) const {
+            auto objectPtr = std::find_if(imageObjects.begin(), imageObjects.end(),
+                                          [&id](const calibration::ImageObject &element) {
+                                              return element.getId() == id;
+                                          });
+            int i = int(objectPtr - imageObjects.begin());
+            if (i >= imageObjects.size()) {
+                i = -1;
+            }
+            return i;
+        }
+
+        void DataSet::merge(int worldObjectIndex, int imageObjectIndex) {
+            if (worldObjectIndex < 0 || imageObjectIndex < 0) {
+                return;
+            }
+            for (const auto &pixel : imageObjects[imageObjectIndex].getCenterLine()) {
+                parametricPoints.emplace_back(calibration::ParametricPoint(
+                        pixel,
+                        worldObjects[worldObjectIndex].getOrigin(),
+                        worldObjects[worldObjectIndex].getAxisA(),
+                        worldObjects[worldObjectIndex].getLength()
+                ));
+            }
+        }
+
+        void DataSet::merge() {
+            parametricPoints.clear();
+            for (const auto &entry : mapping) {
+                auto worldObjectPtr = get<calibration::WorldObject>(entry.first);
+                auto imageObjectPtr = get<calibration::ImageObject>(entry.second);
+
+                merge(worldObjectPtr, imageObjectPtr);
+            }
+        }
+
+        const std::map<std::string, std::string> &DataSet::getMapping() const {
+            return mapping;
         }
 
         template<>

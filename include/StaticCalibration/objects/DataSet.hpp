@@ -46,36 +46,7 @@ namespace static_calibration {
             /**
              * Merges the 3D world objects with the 2D image objects.
              */
-            void merge() {
-                parametricPoints.clear();
-                for (const auto &entry : mapping) {
-                    std::string worldObjectId = entry.first;
-                    std::string imageObjectId = entry.second;
-                    auto worldObjectPtr = std::find_if(worldObjects.begin(), worldObjects.end(),
-                                                       [&worldObjectId](const calibration::WorldObject &element) {
-                                                           return element.getId() == worldObjectId;
-                                                       });
-                    if (worldObjectPtr == worldObjects.end()) {
-                        continue;
-                    }
-                    auto imageObjectPtr = std::find_if(imageObjects.begin(), imageObjects.end(),
-                                                       [&imageObjectId](const calibration::ImageObject &element) {
-                                                           return element.getId() == imageObjectId;
-                                                       });
-                    if (imageObjectPtr == imageObjects.end()) {
-                        continue;
-                    }
-
-                    for (const auto &pixel : imageObjectPtr->getCenterLine()) {
-                        parametricPoints.emplace_back(calibration::ParametricPoint(
-                                pixel,
-                                worldObjectPtr->getOrigin(),
-                                worldObjectPtr->getAxisA(),
-                                worldObjectPtr->getLength()
-                        ));
-                    }
-                }
-            }
+            void merge();
 
         public:
 
@@ -123,6 +94,8 @@ namespace static_calibration {
              */
             const std::vector<calibration::ParametricPoint> &getParametricPoints() const;
 
+            const std::map<std::string, std::string> &getMapping() const;
+
             /**
              * Adds an object to the dataset.
              *
@@ -131,6 +104,9 @@ namespace static_calibration {
              */
             template<class T>
             void add(const T &object);
+
+            template<typename T>
+            int get(std::string id) const;
 
             /**
              * Adds the given objects to the dataset.
@@ -144,6 +120,8 @@ namespace static_calibration {
              * Removes all elements from the dataset.
              */
             void clear();
+
+            void merge(int worldObjectIndex, int imageObjectIndex);
         };
 
 

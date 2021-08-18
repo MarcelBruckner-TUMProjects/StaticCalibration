@@ -8,8 +8,10 @@
 namespace static_calibration {
     namespace utils {
 
-        void renderLine(cv::Mat &finalFrame, const std::string &text, int x, int y, double size) {
-            cv::putText(finalFrame, text, {x, y}, cv::FONT_HERSHEY_SIMPLEX, size, {1, 1, 0});
+        void
+        renderLine(cv::Mat &finalFrame, const std::string &text, int x, int y, double size,
+                   const cv::Vec3d &color) {
+            cv::putText(finalFrame, text, {x, y}, cv::FONT_HERSHEY_SIMPLEX, size, color);
         }
 
         void renderText(cv::Mat &finalFrame, std::stringstream &ss, int run) {
@@ -75,7 +77,8 @@ namespace static_calibration {
             //		ss << ": " << x << "," << y << "," << z;
 
             if (showId) {
-                renderLine(finalFrame, ss.str(), (int) pixel.x(), (int) (finalFrame.rows - 1 - pixel.y()), 0.5);
+                renderLine(finalFrame, ss.str(), (int) pixel.x(), (int) (finalFrame.rows - 1 - pixel.y()), 0.5,
+                           {0, 1, 1});
             }
         }
 
@@ -126,6 +129,41 @@ namespace static_calibration {
 
                 render(finalFrame, worldObject.getId(), origin, translation, rotation, intrinsics, {0, 0, 1}, showIds);
                 render(finalFrame, worldObject.getId(), endAxisA, translation, rotation, intrinsics, {0, 0, 1}, false);
+            }
+        }
+
+
+        void render(cv::Mat &finalFrame, const static_calibration::objects::DataSet &dataSet,
+                    const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                    const std::vector<double> &intrinsics, bool showIds) {
+            static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), translation, rotation, intrinsics,
+                                              showIds);
+            static_calibration::utils::render(finalFrame, dataSet.getImageObjects(), showIds);
+
+            static_calibration::utils::renderMapping(finalFrame, dataSet, translation, rotation, intrinsics);
+
+        }
+
+        void
+        renderMapping(const cv::Mat &finalFrame, const objects::DataSet &dataSet, const Eigen::Vector3d &translation,
+                      const Eigen::Vector3d &rotation, const std::vector<double> &intrinsics) {
+            for (const auto &mapping : dataSet.getMapping()) {
+                int index = dataSet.get<calibration::WorldObject>(mapping.first);
+                auto worldObject = dataSet.getWorldObjects()[index];
+                auto imageObject = dataSet.getImageObjects()[dataSet.get<calibration::ImageObject>(
+                        mapping.second)];
+
+                bool flipped;
+                Eigen::Vector2d pixel = camera::render(translation.data(), rotation.data(),
+                                                       intrinsics.data(),
+                                                       worldObject.getOrigin().data(),
+                                                       flipped);
+                if (flipped) {
+                    continue;
+                }
+                cv::line(finalFrame, cv::Point(pixel.x(), finalFrame.rows - 1 - pixel.y()),
+                         cv::Point(imageObject.getCenterLine()[0].x(),
+                                   finalFrame.rows - 1 - imageObject.getCenterLine()[0].y()), {0, 1, 0});
             }
         }
 

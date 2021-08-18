@@ -20,7 +20,8 @@ namespace static_calibration {
          * @param x The pixel X location.
          * @param y The pixel Y location.
          */
-        void renderLine(cv::Mat &finalFrame, const std::string &text, int x, int y, double size = 1);
+        void renderLine(cv::Mat &finalFrame, const std::string &text, int x, int y, double size = 1,
+                        const cv::Vec3d &color = {1, 1, 0});
 
         void
         renderText(cv::Mat &finalFrame, std::stringstream &ss, int run);
@@ -81,6 +82,13 @@ namespace static_calibration {
         void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibration::ImageObject> &objects,
                     bool showIds);
 
+        void render(cv::Mat &finalFrame, const static_calibration::objects::DataSet &dataSet,
+                    const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                    const std::vector<double> &intrinsics, bool showIds);
+
+        void
+        renderMapping(const cv::Mat &finalFrame, const objects::DataSet &dataSet, const Eigen::Vector3d &translation,
+                      const Eigen::Vector3d &rotation, const std::vector<double> &intrinsics);
 
         /**
          * Adds an alpha channel to the given frame and converts to [0..1] color range.

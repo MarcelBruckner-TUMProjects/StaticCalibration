@@ -94,7 +94,7 @@ namespace static_calibration {
             auto dataset = static_calibration::objects::DataSet("../misc/objects.yaml", "../misc/pixels.yaml",
                                                                 "../misc/mapping.yaml");
             const auto &parametricPoints = dataset.getParametricPoints();
-            ASSERT_EQ(parametricPoints.size(), 126);
+            ASSERT_EQ(parametricPoints.size(), 172);
         }
     }
 }
