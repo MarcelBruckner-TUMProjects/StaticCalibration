@@ -32,6 +32,11 @@ namespace static_calibration {
             std::string pixelsFile;
 
             /**
+             * The path to the file containing the mapping between 3D world objects and 2D image objects.
+             */
+            std::string mappingFile;
+
+            /**
              * The path to the file containing the lane samples.
              */
             std::string laneSamplesFile;

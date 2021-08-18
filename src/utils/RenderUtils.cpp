@@ -131,10 +131,13 @@ namespace static_calibration {
 
         void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibration::ImageObject> &objects,
                     bool showIds) {
+            int imageHeight = finalFrame.rows - 1;
+
             for (const auto &imageObject: objects) {
                 const auto &pixels = imageObject.getPixels();
                 for (const auto &pixel : pixels) {
-                    render({1, 0, 0}, finalFrame, pixel);
+                    finalFrame.at<cv::Vec4d>(cv::Point((int) pixel.x(), int(imageHeight - pixel.y()))) =
+                            cv::Vec4d(1, 0, 0, 1);
                 }
 
                 if (showIds && !pixels.empty()) {

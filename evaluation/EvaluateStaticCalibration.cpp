@@ -7,7 +7,7 @@
 
 #include "StaticCalibration/camera/RenderingPipeline.hpp"
 #include "StaticCalibration/objects/WorldObject.hpp"
-#include "StaticCalibration/objects/ObjectsLoading.hpp"
+#include "StaticCalibration/objects/DataSet.hpp"
 #include "StaticCalibration/CameraPoseEstimationBase.hpp"
 #include "StaticCalibration/utils/CommandLineParser.hpp"
 #include "CSVWriter.hpp"
@@ -50,10 +50,8 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-    auto objects = static_calibration::calibration::loadObjects<static_calibration::calibration::WorldObject>(
-            parsedOptions.objectsFile);
-    auto imageObjects = static_calibration::calibration::loadObjects<static_calibration::calibration::ImageObject>(
-            parsedOptions.pixelsFile);
+    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.pixelsFile,
+                                                        parsedOptions.mappingFile);
 
     google::InitGoogleLogging("Static Calibration");
 
@@ -93,9 +91,7 @@ int main(int argc, char const *argv[]) {
                 break;
             }
             run++;
-            estimator->clearWorldObjects();
-            estimator->addWorldObjects(objects);
-            estimator->addImageObjects(imageObjects);
+            estimator->setDataSet(dataSet);
             estimator->setIntrinsics(parsedOptions.intrinsics);
 
 #ifdef WITH_OPENCV
@@ -111,7 +107,8 @@ int main(int argc, char const *argv[]) {
         intrinsics = estimator->getIntrinsics();
 
         finalFrame = evaluationFrame * 0.5;
-        static_calibration::utils::render(finalFrame, objects, translation, rotation, intrinsics, trackbarShowIds);
+        static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), translation, rotation, intrinsics,
+                                          trackbarShowIds);
         static_calibration::utils::renderText(finalFrame, estimator, run);
 
         cv::imshow(windowName, finalFrame);

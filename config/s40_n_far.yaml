@@ -3,8 +3,9 @@ camera_name: "s_cam_far"
 objects_file: "/mnt/local_data/providentia/hd_map/NewMap/2021-07-07_1490_Providentia_Plus_Plus_1_6/2021-07-07_1490_Providentia_Plus_Plus_1_6.xodr_objects.yaml"
 lane_samples_file: "/mnt/local_data/providentia/hd_map/NewMap/2021-07-07_1490_Providentia_Plus_Plus_1_6/2021-07-07_1490_Providentia_Plus_Plus_1_6.xodr_lane_samples.yaml"
 explicit_road_marks_file: "/mnt/local_data/providentia/hd_map/NewMap/2021-07-07_1490_Providentia_Plus_Plus_1_6/2021-07-07_1490_Providentia_Plus_Plus_1_6.xodr_explicit_road_marks.yaml"
-pixels_file: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.bmp_result.yaml"
-background_frame: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.bmp"
+pixels_file: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.png_result.yaml"
+mapping_file: "/mnt/local_data/providentia/static_calibration/s40/n/far/mapping.yaml"
+background_frame: "/mnt/local_data/providentia/static_calibration/s40/n/far/frame.png"
 intrinsics: [ 9023.482825, 9014.504360, 1222.314303, 557.541182 ]
 ros_tf2_coordinates: true
 translation: [ -444.62679384269882, 117.6633265127147, 10.015564539146094 ]

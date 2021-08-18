@@ -439,11 +439,6 @@ namespace static_calibration {
             void setWeightPenalizeScale(double weightPenalizeScale);
 
             /**
-             * Clears the vector of world objects used for the pose estimation.
-             */
-            void clearWorldObjects();
-
-            /**
              * @get
              */
             std::vector<double> getWeights();

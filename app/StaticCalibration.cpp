@@ -16,16 +16,15 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-    auto objects = static_calibration::calibration::loadObjects<static_calibration::calibration::WorldObject>(
-            parsedOptions.objectsFile);
+    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.pixelsFile,
+                                                        parsedOptions.mappingFile);
 
-    auto imageObjects = static_calibration::calibration::loadObjects<static_calibration::calibration::ImageObject>(
-            parsedOptions.pixelsFile);
 
     static_calibration::calibration::CameraPoseEstimationWithIntrinsics estimator(parsedOptions.intrinsics);
 //    estimator.fixIntrinsics(true);
 
     google::InitGoogleLogging("Static Calibration");
+    estimator.setDataSet(dataSet);
     estimator.estimate(parsedOptions.logEstimationProgress);
 
     if (!estimator.hasFoundValidSolution()) {

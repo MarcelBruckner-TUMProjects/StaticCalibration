@@ -6,52 +6,11 @@
 #include "yaml-cpp/yaml.h"
 
 #include <utility>
+#include <iostream>
 #include "StaticCalibration/objects/YAMLExtension.hpp"
 
 namespace static_calibration {
     namespace objects {
-        template<>
-        void DataSet::merge(const calibration::WorldObject &object) {
-            for (const auto &imageObject : imageObjects) {
-                if (imageObject.getId() == object.getId()) {
-                    for (const auto &pixel : imageObject.getCenterLine()) {
-                        parametricPoints.emplace_back(calibration::ParametricPoint(
-                                pixel,
-                                object.getOrigin(),
-                                object.getAxisA(),
-                                object.getLength()
-                        ));
-                    }
-                }
-            }
-        }
-
-        template<>
-        void DataSet::merge(const calibration::ImageObject &object) {
-            for (const auto &worldObject : worldObjects) {
-                if (worldObject.getId() == object.getId()) {
-                    for (const auto &pixel : object.getCenterLine()) {
-                        parametricPoints.emplace_back(calibration::ParametricPoint(
-                                pixel,
-                                worldObject.getOrigin(),
-                                worldObject.getAxisA(),
-                                worldObject.getLength()
-                        ));
-                    }
-                }
-            }
-        }
-
-
-        DataSet::DataSet(
-                std::vector<static_calibration::calibration::WorldObject> worldObjects,
-                std::vector<static_calibration::calibration::ImageObject> imageObjects) :
-                worldObjects(std::move(worldObjects)),
-                imageObjects(std::move(imageObjects)) {
-            for (const auto &worldObject : this->worldObjects) {
-                merge(worldObject);
-            }
-        }
 
         const std::vector<static_calibration::calibration::WorldObject> &DataSet::getWorldObjects() const {
             return worldObjects;
@@ -61,17 +20,14 @@ namespace static_calibration {
             return imageObjects;
         }
 
-
         template<>
         void DataSet::add(const calibration::WorldObject &object) {
             worldObjects.emplace_back(object);
-            merge(object);
         }
 
         template<>
         void DataSet::add(const calibration::ImageObject &object) {
             imageObjects.emplace_back(object);
-            merge(object);
         }
 
         YAML::Node loadFile(const std::string &objectsFile) {
@@ -82,8 +38,8 @@ namespace static_calibration {
             }
         }
 
-        template<>
-        void DataSet::loadFromFile<calibration::WorldObject>(const std::string &objectsFile) {
+        std::vector<calibration::WorldObject> loadWorldObjects(const std::string &objectsFile) {
+            std::vector<calibration::WorldObject> worldObjects;
             YAML::Node objectsFileYAML = loadFile(objectsFile);
 
             for (const auto &objectNode : objectsFileYAML["objects"]) {
@@ -97,13 +53,22 @@ namespace static_calibration {
                 auto axisA = Eigen::Vector3d::UnitZ();
                 calibration::WorldObject worldObject(id, origin, axisA, length);
                 worldObjects.emplace_back(worldObject);
-                merge(worldObject);
             }
+            return worldObjects;
         }
 
 
-        template<>
-        void DataSet::loadFromFile<calibration::ImageObject>(const std::string &objectsFile) {
+        std::map<std::string, std::string> loadMapping(const std::string &objectsFile) {
+            std::map<std::string, std::string> mapping;
+            YAML::Node objectsFileYAML = loadFile(objectsFile);
+            for (const auto &node : objectsFileYAML) {
+                mapping[node.first.as<std::string>()] = node.second.as<std::string>();
+            }
+            return mapping;
+        }
+
+        std::vector<calibration::ImageObject> loadImageObjects(const std::string &objectsFile) {
+            std::vector<calibration::ImageObject> imageObjects;
             YAML::Node objectsFileYAML = loadFile(objectsFile);
 
             auto imageHeight = objectsFileYAML["image_size"].as<std::vector<int>>()[0];
@@ -117,19 +82,16 @@ namespace static_calibration {
                     imageObject.addPixel(pixel);
                 }
                 imageObjects.emplace_back(imageObject);
-                merge(imageObject);
             }
+            return imageObjects;
         }
 
-
-        DataSet::DataSet(const std::string &objectsFile, const std::string &imageObjectsFile) {
-            loadFromFile<calibration::WorldObject>(objectsFile);
-            loadFromFile<calibration::ImageObject>(imageObjectsFile);
-        }
-
-        const std::vector<static_calibration::calibration::ParametricPoint> &DataSet::getParametricPoints() const {
-            return parametricPoints;
-        }
+        DataSet::DataSet(const std::string &objectsFile, const std::string &imageObjectsFile,
+                         const std::string &mappingFile) : DataSet(
+                loadWorldObjects(objectsFile),
+                loadImageObjects(imageObjectsFile),
+                loadMapping(mappingFile)
+        ) {}
 
         void DataSet::clear() {
             worldObjects.clear();
@@ -139,19 +101,38 @@ namespace static_calibration {
         void DataSet::add(const calibration::WorldObject &worldObject, const calibration::ImageObject &imageObject) {
             worldObjects.emplace_back(worldObject);
             imageObjects.emplace_back(imageObject);
-            merge(worldObject, imageObject);
+            mapping[worldObject.getId()] = imageObject.getId();
+            merge();
         }
 
-        void DataSet::merge(const calibration::WorldObject &worldObject, const calibration::ImageObject &imageObject) {
-            for (const auto &pixel : imageObject.getCenterLine()) {
-                parametricPoints.emplace_back(calibration::ParametricPoint(
-                        pixel,
-                        worldObject.getOrigin(),
-                        worldObject.getAxisA(),
-                        worldObject.getLength()
-                ));
-            }
+        DataSet::DataSet(const std::vector<static_calibration::calibration::WorldObject> &worldObjects,
+                         const std::vector<static_calibration::calibration::ImageObject> &imageObjects,
+                         const std::map<std::string, std::string> &mapping) : worldObjects(worldObjects),
+                                                                              imageObjects(imageObjects),
+                                                                              mapping(mapping) {
+            merge();
         }
 
+        template<>
+        DataSet DataSet::from<calibration::WorldObject>(const std::string &objectsFile) {
+            return {
+                    loadWorldObjects(objectsFile),
+                    {},
+                    {}
+            };
+        }
+
+        const std::vector<calibration::ParametricPoint> &DataSet::getParametricPoints() const {
+            return parametricPoints;
+        }
+
+        template<>
+        DataSet DataSet::from<calibration::ImageObject>(const std::string &objectsFile) {
+            return {
+                    {},
+                    loadImageObjects(objectsFile),
+                    {}
+            };
+        }
     }
 }

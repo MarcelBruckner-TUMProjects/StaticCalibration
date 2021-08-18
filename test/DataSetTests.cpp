@@ -70,20 +70,20 @@ namespace static_calibration {
                     "../misc/pixels.yaml");
             auto imageObjects = dataSet.getImageObjects();
 
-            ASSERT_EQ(imageObjects.size(), 17);
+            ASSERT_EQ(imageObjects.size(), 62);
             ASSERT_EQ(dataSet.getParametricPoints().size(), 0);
 
             auto imageObject = imageObjects[0];
-            ASSERT_STREQ(imageObject.getId().c_str(), "4007967");
-            ASSERT_EQ(imageObject.size(), 98);
-            assertVectorEqual(imageObject.getPixels()[0], 11, 1200 - 385 - 1);
-            assertVectorEqual(imageObject.getPixels()[imageObject.getPixels().size() - 1], 16, 1200 - 405 - 1);
+            ASSERT_STREQ(imageObject.getId().c_str(), "1");
+            ASSERT_EQ(imageObject.size(), 3196);
+            assertVectorEqual(imageObject.getPixels()[0], 487, 1200 - 1036 - 1);
+            assertVectorEqual(imageObject.getPixels()[imageObject.getPixels().size() - 1], 477, 1200 - 1123 - 1);
 
             const std::vector<Eigen::Vector2d> &centerLine = imageObject.getCenterLine();
-            ASSERT_EQ(centerLine.size(), 405 - 385 + 1);
-            assertVectorEqual(centerLine[0], 15.5, 1200 - 405 - 1);
-            assertVectorEqual(centerLine[4], 14.5, 1200 - 401 - 1);
-            assertVectorEqual(centerLine[centerLine.size() - 1], 12, 1200 - 385 - 1);
+            ASSERT_EQ(centerLine.size(), 1123 - 1036 + 1);
+            assertVectorEqual(centerLine[0], 476, 1200 - 1123 - 1);
+            assertVectorEqual(centerLine[1], 482.470588235, 1200 - 1122 - 1);
+            assertVectorEqual(centerLine[centerLine.size() - 1], 504.31818181818181, 1200 - 1036 - 1);
         }
 
 
@@ -91,9 +91,10 @@ namespace static_calibration {
          * Tests loading the image objects from a YAML file.
          */
         TEST_F(ObjectsLoadingTests, testMergeObjects) {
-            auto dataset = static_calibration::objects::DataSet("../misc/objects.yaml", "../misc/pixels.yaml");
+            auto dataset = static_calibration::objects::DataSet("../misc/objects.yaml", "../misc/pixels.yaml",
+                                                                "../misc/mapping.yaml");
             const auto &parametricPoints = dataset.getParametricPoints();
-            ASSERT_EQ(parametricPoints.size(), 38);
+            ASSERT_EQ(parametricPoints.size(), 126);
         }
     }
 }

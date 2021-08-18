@@ -59,7 +59,7 @@ namespace static_calibration {
 
         Eigen::Vector3d CameraPoseEstimationBase::calculateMean() {
             Eigen::Vector3d meanVector(0, 0, 0);
-            auto &parametricPoints = dataSet.getParametricPoints();
+            auto parametricPoints = dataSet.getParametricPoints();
             for (const auto &worldObject : parametricPoints) {
                 meanVector += worldObject.getOrigin();
             }

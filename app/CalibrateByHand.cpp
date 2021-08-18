@@ -11,7 +11,8 @@
 int main(int argc, char const *argv[]) {
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.pixelsFile);
+    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.pixelsFile,
+                                                        parsedOptions.mappingFile);
 
     cv::Mat evaluationFrame = cv::imread(parsedOptions.evaluationBackgroundFrame);
     evaluationFrame = static_calibration::utils::addAlphaChannel(evaluationFrame);
