@@ -12,7 +12,7 @@
 namespace static_calibration {
     namespace objects {
 
-        const std::vector<static_calibration::calibration::WorldObject> &DataSet::getWorldObjects() const {
+        const std::vector<static_calibration::calibration::Object> &DataSet::getWorldObjects() const {
             return worldObjects;
         }
 
@@ -21,8 +21,13 @@ namespace static_calibration {
         }
 
         template<>
-        void DataSet::add(const calibration::WorldObject &object) {
+        void DataSet::add(const calibration::Object &object) {
             worldObjects.emplace_back(object);
+        }
+
+        template<>
+        void DataSet::add(const calibration::RoadMark &object) {
+            explicitRoadMarks.emplace_back(object);
         }
 
         template<>
@@ -38,8 +43,54 @@ namespace static_calibration {
             }
         }
 
-        std::vector<calibration::WorldObject> loadWorldObjects(const std::string &objectsFile) {
-            std::vector<calibration::WorldObject> worldObjects;
+        std::vector<calibration::RoadMark>
+        mergeRoadMarks(const std::vector<calibration::RoadMark> &originalRoadMarks) {
+            std::vector<calibration::RoadMark> roadMarks = originalRoadMarks;
+
+            for (const auto &a : originalRoadMarks) {
+                for (const auto &b : originalRoadMarks) {
+                    if ((a.getEnd() - b.getOrigin()).norm() < 0.1) {
+                        // TODO remove erase, as slow
+                        roadMarks.erase(std::remove(roadMarks.begin(), roadMarks.end(), a), roadMarks.end());
+                        roadMarks.erase(std::remove(roadMarks.begin(), roadMarks.end(), b), roadMarks.end());
+                        roadMarks.emplace_back(calibration::RoadMark(a.getId(), a.getOrigin(), b.getEnd()));
+                    }
+                }
+            }
+
+            return roadMarks;
+        }
+
+        std::vector<calibration::RoadMark> loadExplicitRoadMarks(const std::string &objectsFile) {
+            if (objectsFile.empty()) {
+                return {};
+            }
+            std::vector<calibration::RoadMark> roadMarks;
+            YAML::Node objectsFileYAML = loadFile(objectsFile);
+
+            for (const auto &roadNode : objectsFileYAML["roads"]) {
+                for (const auto &laneSectionNode : roadNode["laneSections"]) {
+                    for (const auto &laneNode : laneSectionNode["lanes"]) {
+                        for (const auto &roadMarkNode : laneNode["explicitRoadMarks"]) {
+                            auto id = roadMarkNode["id"].as<std::string>();
+                            auto start = roadMarkNode["coordinates"][0].as<Eigen::Vector3d>();
+                            auto end = roadMarkNode["coordinates"][1].as<Eigen::Vector3d>();
+                            auto worldObject = calibration::RoadMark(id, start, end);
+                            roadMarks.emplace_back(worldObject);
+                        }
+                    }
+                }
+            }
+
+            return mergeRoadMarks(roadMarks);
+        }
+
+
+        std::vector<calibration::Object> loadWorldObjects(const std::string &objectsFile) {
+            if (objectsFile.empty()) {
+                return {};
+            }
+            std::vector<calibration::Object> worldObjects;
             YAML::Node objectsFileYAML = loadFile(objectsFile);
 
             for (const auto &objectNode : objectsFileYAML["objects"]) {
@@ -49,9 +100,12 @@ namespace static_calibration {
                 }
                 auto id = objectNode["id"].as<std::string>();
                 auto length = objectNode["height"].as<double>();
+//                if (length > 30) {
+//                    continue;
+//                }
                 auto origin = objectNode["shifted_coord"].as<Eigen::Vector3d>();
                 auto axisA = Eigen::Vector3d::UnitZ();
-                calibration::WorldObject worldObject(id, origin, axisA, length);
+                calibration::Object worldObject(id, origin, axisA, length);
                 worldObjects.emplace_back(worldObject);
             }
             return worldObjects;
@@ -59,6 +113,9 @@ namespace static_calibration {
 
 
         std::map<std::string, std::string> loadMapping(const std::string &objectsFile) {
+            if (objectsFile.empty()) {
+                return {};
+            }
             std::map<std::string, std::string> mapping;
             YAML::Node objectsFileYAML = loadFile(objectsFile);
             for (const auto &node : objectsFileYAML) {
@@ -68,6 +125,9 @@ namespace static_calibration {
         }
 
         std::vector<calibration::ImageObject> loadImageObjects(const std::string &objectsFile) {
+            if (objectsFile.empty()) {
+                return {};
+            }
             std::vector<calibration::ImageObject> imageObjects;
             YAML::Node objectsFileYAML = loadFile(objectsFile);
 
@@ -86,9 +146,11 @@ namespace static_calibration {
             return imageObjects;
         }
 
-        DataSet::DataSet(const std::string &objectsFile, const std::string &imageObjectsFile,
+        DataSet::DataSet(const std::string &objectsFile, const std::string &explicitRoadMarksFile,
+                         const std::string &imageObjectsFile,
                          const std::string &mappingFile) : DataSet(
                 loadWorldObjects(objectsFile),
+                loadExplicitRoadMarks(explicitRoadMarksFile),
                 loadImageObjects(imageObjectsFile),
                 loadMapping(mappingFile)
         ) {}
@@ -99,28 +161,61 @@ namespace static_calibration {
             mapping.clear();
         }
 
-        void DataSet::add(const calibration::WorldObject &worldObject, const calibration::ImageObject &imageObject) {
-            worldObjects.emplace_back(worldObject);
-            imageObjects.emplace_back(imageObject);
-            mapping[worldObject.getId()] = imageObject.getId();
-            merge(worldObjects.size() - 1, imageObjects.size() - 1);
-        }
-
-        DataSet::DataSet(const std::vector<static_calibration::calibration::WorldObject> &worldObjects,
-                         const std::vector<static_calibration::calibration::ImageObject> &imageObjects,
-                         const std::map<std::string, std::string> &mapping) : worldObjects(worldObjects),
-                                                                              imageObjects(imageObjects),
-                                                                              mapping(mapping) {
-            merge();
+        template<>
+        void DataSet::merge<calibration::Object>(int worldObjectIndex, int imageObjectIndex) {
+            if (worldObjectIndex < 0 || imageObjectIndex < 0) {
+                return;
+            }
+            for (const auto &pixel : imageObjects[imageObjectIndex].getCenterLine()) {
+                parametricPoints.emplace_back(calibration::ParametricPoint(
+                        pixel,
+                        worldObjects[worldObjectIndex].getOrigin(),
+                        worldObjects[worldObjectIndex].getAxis(),
+                        worldObjects[worldObjectIndex].getLength()
+                ));
+            }
         }
 
         template<>
-        DataSet DataSet::from<calibration::WorldObject>(const std::string &objectsFile) {
-            return {
-                    loadWorldObjects(objectsFile),
-                    {},
-                    {}
-            };
+        void DataSet::merge<calibration::RoadMark>(int worldObjectIndex, int imageObjectIndex) {
+            if (worldObjectIndex < 0 || imageObjectIndex < 0) {
+                return;
+            }
+            for (const auto &pixel : imageObjects[imageObjectIndex].getCenterLine()) {
+                parametricPoints.emplace_back(calibration::ParametricPoint(
+                        pixel,
+                        explicitRoadMarks[worldObjectIndex].getOrigin(),
+                        explicitRoadMarks[worldObjectIndex].getAxis(),
+                        explicitRoadMarks[worldObjectIndex].getLength()
+                ));
+            }
+        }
+
+        template<>
+        void DataSet::add(const calibration::Object &worldObject, const calibration::ImageObject &imageObject) {
+            worldObjects.emplace_back(worldObject);
+            imageObjects.emplace_back(imageObject);
+            mapping[worldObject.getId()] = imageObject.getId();
+            merge<calibration::Object>(worldObjects.size() - 1, imageObjects.size() - 1);
+        }
+
+        template<>
+        void DataSet::add(const calibration::RoadMark &worldObject, const calibration::ImageObject &imageObject) {
+            explicitRoadMarks.emplace_back(worldObject);
+            imageObjects.emplace_back(imageObject);
+            mapping[worldObject.getId()] = imageObject.getId();
+            merge<calibration::RoadMark>(worldObjects.size() - 1, imageObjects.size() - 1);
+        }
+
+        DataSet::DataSet(std::vector<static_calibration::calibration::Object> worldObjects,
+                         std::vector<static_calibration::calibration::RoadMark> explicitRoadMarks,
+                         std::vector<static_calibration::calibration::ImageObject> imageObjects,
+                         std::map<std::string, std::string> mapping) : worldObjects(std::move(worldObjects)),
+                                                                       explicitRoadMarks(
+                                                                               std::move(explicitRoadMarks)),
+                                                                       imageObjects(std::move(imageObjects)),
+                                                                       mapping(std::move(mapping)) {
+            merge();
         }
 
         const std::vector<calibration::ParametricPoint> &DataSet::getParametricPoints() const {
@@ -129,16 +224,32 @@ namespace static_calibration {
 
 
         template<>
-        int DataSet::get<calibration::WorldObject>(std::string id) const {
+        int DataSet::get<calibration::Object>(std::string id) const {
             auto objectPtr = std::find_if(worldObjects.begin(), worldObjects.end(),
                                           [&id](const calibration::WorldObject &element) {
                                               return element.getId() == id;
                                           });
             int i = int(objectPtr - worldObjects.begin());
-            if (i >= worldObjects.size()) {
-                i = -1;
+            if (i < worldObjects.size()) {
+                return i;
             }
-            return i;
+
+
+            return -1;
+        }
+
+        template<>
+        int DataSet::get<calibration::RoadMark>(std::string id) const {
+            auto objectPtr = std::find_if(explicitRoadMarks.begin(), explicitRoadMarks.end(),
+                                          [&id](const calibration::WorldObject &element) {
+                                              return element.getId() == id;
+                                          });
+            int i = int(objectPtr - explicitRoadMarks.begin());
+            if (i < explicitRoadMarks.size()) {
+                return i;
+            }
+
+            return -1;
         }
 
         template<>
@@ -154,27 +265,13 @@ namespace static_calibration {
             return i;
         }
 
-        void DataSet::merge(int worldObjectIndex, int imageObjectIndex) {
-            if (worldObjectIndex < 0 || imageObjectIndex < 0) {
-                return;
-            }
-            for (const auto &pixel : imageObjects[imageObjectIndex].getCenterLine()) {
-                parametricPoints.emplace_back(calibration::ParametricPoint(
-                        pixel,
-                        worldObjects[worldObjectIndex].getOrigin(),
-                        worldObjects[worldObjectIndex].getAxisA(),
-                        worldObjects[worldObjectIndex].getLength()
-                ));
-            }
-        }
 
         void DataSet::merge() {
             parametricPoints.clear();
             for (const auto &entry : mapping) {
-                auto worldObjectPtr = get<calibration::WorldObject>(entry.first);
                 auto imageObjectPtr = get<calibration::ImageObject>(entry.second);
-
-                merge(worldObjectPtr, imageObjectPtr);
+                merge<calibration::Object>(get<calibration::Object>(entry.first), imageObjectPtr);
+                merge<calibration::RoadMark>(get<calibration::RoadMark>(entry.first), imageObjectPtr);
             }
         }
 
@@ -182,13 +279,8 @@ namespace static_calibration {
             return mapping;
         }
 
-        template<>
-        DataSet DataSet::from<calibration::ImageObject>(const std::string &objectsFile) {
-            return {
-                    {},
-                    loadImageObjects(objectsFile),
-                    {}
-            };
+        const std::vector<static_calibration::calibration::RoadMark> &DataSet::getExplicitRoadMarks() const {
+            return explicitRoadMarks;
         }
     }
 }

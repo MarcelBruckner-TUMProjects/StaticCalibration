@@ -44,16 +44,23 @@ namespace static_calibration {
 
         public:
 
+            enum Type {
+                ROAD_MARK,
+                OBJECT
+            } type;
+
+            explicit WorldObject() = default;
+
             /**
              * @constructor
              */
-            WorldObject(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &axisA,
+            WorldObject(const std::string &id, Type type, const Eigen::Vector3d &origin, const Eigen::Vector3d &axisA,
                         double length);
 
             /**
              * @constructor
              */
-            WorldObject(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &end);
+            WorldObject(const std::string &id, Type type, const Eigen::Vector3d &origin, const Eigen::Vector3d &end);
 
             /**
              * @destructor
@@ -75,6 +82,8 @@ namespace static_calibration {
              */
             double getLength() const;
 
+            Type getType() const;
+
             /**
              * @set
              */
@@ -82,16 +91,39 @@ namespace static_calibration {
 
             const Eigen::Vector3d &getOrigin() const;
 
-            const Eigen::Vector3d &getAxisA() const;
+            const Eigen::Vector3d &getAxis() const;
 
-            const Eigen::Vector3d &getAxisB() const;
+            Eigen::Vector3d getEnd() const;
 
-            double getLengthB() const;
+            Eigen::Vector3d getMid() const;
 
-            Eigen::Vector3d getEndAxisA() const;
+            friend inline bool operator==(const WorldObject &lhs, const WorldObject &rhs) {
+                return lhs.getId() == rhs.getId();
+            }
 
-            Eigen::Vector3d getEndAxisB() const;
         };
+
+        /**
+         * Convenience wrapper for objects.
+         */
+        class Object : public WorldObject {
+        public:
+            /**
+             * @constructor
+             */
+            Object(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &axisA,
+                   double length) : WorldObject(id, WorldObject::Type::OBJECT, origin, axisA, length) {};
+        };
+
+        class RoadMark : public WorldObject {
+        public:
+            /**
+             * @constructor
+             */
+            RoadMark(const std::string &id, const Eigen::Vector3d &origin,
+                     const Eigen::Vector3d &end) : WorldObject(id, WorldObject::Type::ROAD_MARK, origin, end) {};
+        };
+
     }
 }
 

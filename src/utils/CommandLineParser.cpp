@@ -59,6 +59,15 @@ namespace static_calibration {
             return result;
         }
 
+        template<typename T>
+        T getOrThrow(YAML::Node config, std::string variableName) {
+            try {
+                return config[variableName].template as<T>();
+            } catch (const YAML::Exception &e) {
+                throw std::invalid_argument("Couldn't parse value of: " + variableName);
+            }
+        }
+
         ParsedOptions parseCommandLine(int argc, const char **argv) {
             auto desc = createOptionsDescription();
 
@@ -89,27 +98,22 @@ namespace static_calibration {
             }
 
             ParsedOptions parsedOptions;
-            try {
-                parsedOptions = ParsedOptions{
-                        prefixFile(basepath, config["objects_file"].as<std::string>()),
-                        prefixFile(basepath, config["pixels_file"].as<std::string>()),
-                        prefixFile(basepath, config["mapping_file"].as<std::string>()),
-                        prefixFile(basepath, getOrDefault(config, "lane_samples_file", std::string())),
-                        prefixFile(basepath, config["explicit_road_marks_file"].as<std::string>()),
-                        config["measurement_point"].as<std::string>(),
-                        config["camera_name"].as<std::string>(),
-                        prefixFile(basepath, getOrDefault(config, "background_frame", std::string())),
-                        getOrDefault(config, "evaluation_runs", 10),
-                        config["intrinsics"].as<std::vector<double>>(),
-                        translation,
-                        rotation,
-                        getOrDefault(config, "optimize_intrinsics", false),
-                        getOrDefault(config, "log_optimization", true)
-                };
-            } catch (const YAML::BadConversion &e) {
-                throw std::invalid_argument(
-                        "Couldn't parse the config file. Please see the Readme.md\n" + std::string(e.what()));
-            }
+            parsedOptions = ParsedOptions{
+                    prefixFile(basepath, getOrThrow<std::string>(config, "objects_file")),
+                    prefixFile(basepath, getOrThrow<std::string>(config, "pixels_file")),
+                    prefixFile(basepath, getOrThrow<std::string>(config, "mapping_file")),
+                    prefixFile(basepath, getOrDefault(config, "lane_samples_file", std::string())),
+                    prefixFile(basepath, getOrDefault(config, "explicit_road_marks_file", std::string())),
+                    getOrThrow<std::string>(config, "measurement_point"),
+                    getOrThrow<std::string>(config, "camera_name"),
+                    prefixFile(basepath, getOrDefault(config, "background_frame", std::string())),
+                    getOrDefault(config, "evaluation_runs", 10),
+                    getOrThrow<std::vector<double>>(config, "intrinsics"),
+                    translation,
+                    rotation,
+                    getOrDefault(config, "optimize_intrinsics", false),
+                    getOrDefault(config, "log_optimization", true)
+            };
 
             return parsedOptions;
         }

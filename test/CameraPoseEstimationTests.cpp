@@ -109,7 +109,7 @@ namespace static_calibration {
                 ImageObject laneImageObject(id);
 
                 for (int i = 0; i <= number; i++) {
-                    Eigen::Vector3d point = origin + (laneObject.getLength() / 10. * i) * laneObject.getAxisA();
+                    Eigen::Vector3d point = origin + (laneObject.getLength() / 10. * i) * laneObject.getAxis();
                     laneImageObject.addPixel(getPixel(point));
                 }
 

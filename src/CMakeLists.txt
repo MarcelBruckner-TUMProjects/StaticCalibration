@@ -43,7 +43,8 @@ add_library(StaticCalibration-lib
         utils/Formatters.cpp
         utils/RenderUtils.cpp
         objects/ImageObject.cpp
-        objects/DataSet.cpp)
+        objects/DataSet.cpp
+        )
 
 target_include_directories(StaticCalibration-lib
         INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

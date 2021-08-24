@@ -16,7 +16,8 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.pixelsFile,
+    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.explicitRoadMarksFile,
+                                                        parsedOptions.pixelsFile,
                                                         parsedOptions.mappingFile);
 
 

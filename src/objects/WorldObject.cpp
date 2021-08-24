@@ -25,9 +25,11 @@ namespace static_calibration {
             length = value;
         }
 
-        WorldObject::WorldObject(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &axisA,
+        WorldObject::WorldObject(const std::string &id, Type type, const Eigen::Vector3d &origin,
+                                 const Eigen::Vector3d &axisA,
                                  double length)
                 : origin(origin),
+                  type(type),
                   axis(axisA.stableNormalized()),
                   id(id),
                   length(length) {}
@@ -36,15 +38,24 @@ namespace static_calibration {
             return origin;
         }
 
-        const Eigen::Vector3d &WorldObject::getAxisA() const {
+        const Eigen::Vector3d &WorldObject::getAxis() const {
             return axis;
         }
 
-        Eigen::Vector3d WorldObject::getEndAxisA() const {
-            return getOrigin() + getAxisA() * getLength();
+        Eigen::Vector3d WorldObject::getEnd() const {
+            return getOrigin() + getAxis() * getLength();
         }
 
-        WorldObject::WorldObject(const std::string &id, const Eigen::Vector3d &origin, const Eigen::Vector3d &end) :
-                WorldObject(id, origin, (end - origin), (end - origin).stableNorm()) {}
+        Eigen::Vector3d WorldObject::getMid() const {
+            return getOrigin() + getAxis() * (0.5 * getLength());
+        }
+
+        WorldObject::WorldObject(const std::string &id, Type type, const Eigen::Vector3d &origin,
+                                 const Eigen::Vector3d &end) :
+                WorldObject(id, type, origin, (end - origin), (end - origin).stableNorm()) {}
+
+        WorldObject::Type WorldObject::getType() const {
+            return type;
+        }
     }
 }

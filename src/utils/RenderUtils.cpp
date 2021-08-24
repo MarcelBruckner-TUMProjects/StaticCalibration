@@ -120,26 +120,76 @@ namespace static_calibration {
             );
         }
 
-        void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibration::WorldObject> &objects,
+        void render(cv::Mat &finalFrame, const static_calibration::calibration::WorldObject &worldObject,
                     const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                    const std::vector<double> &intrinsics, bool showIds) {
-            for (const auto &worldObject: objects) {
-                const auto &origin = worldObject.getOrigin();
-                const auto &endAxisA = worldObject.getEndAxisA();
+                    const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance, cv::Vec3d color) {
+            const auto &origin = worldObject.getOrigin();
+            const auto &endAxisA = worldObject.getEnd();
 
-                render(finalFrame, worldObject.getId(), origin, translation, rotation, intrinsics, {0, 0, 1}, showIds);
-                render(finalFrame, worldObject.getId(), endAxisA, translation, rotation, intrinsics, {0, 0, 1}, false);
+            Eigen::Vector4d vectorInCameraSpace = static_calibration::camera::toCameraSpace(
+                    translation.data(), rotation.data(), origin.data());
+
+            if (vectorInCameraSpace.z() < 0 || vectorInCameraSpace.z() > maxRenderDistance) {
+                return;
+            }
+
+            bool flipped;
+            auto originPixel = render(translation, rotation,
+                                      intrinsics, origin.homogeneous(), color,
+                                      finalFrame, flipped);
+            if (flipped) {
+                return;
+            }
+
+            auto endPixel = render(translation, rotation,
+                                   intrinsics, endAxisA.homogeneous(), color,
+                                   finalFrame, flipped);
+            if (flipped) {
+                return;
+            }
+
+            std::stringstream ss;
+            ss << std::fixed;
+            ss << worldObject.getId();
+            //		ss << ": " << x << "," << y << "," << z;
+
+            if (showIds) {
+                renderLine(finalFrame, ss.str(), (int) originPixel.x(),
+                           (int) (finalFrame.rows - 1 - originPixel.y()), 0.5, {0, 1, 1});
+            }
+
+            cv::line(finalFrame, cv::Point(originPixel.x(), finalFrame.rows - 1 - originPixel.y()),
+                     cv::Point(endPixel.x(), finalFrame.rows - 1 - endPixel.y()),
+                     color, 2);
+        }
+
+        void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibration::Object> &objects,
+                    const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                    const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance) {
+            cv::Vec3d color(0, 0, 1);
+            for (const auto &worldObject: objects) {
+                render(finalFrame, worldObject, translation, rotation, intrinsics, showIds, maxRenderDistance, color);
+            }
+        }
+
+        void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibration::RoadMark> &objects,
+                    const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                    const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance) {
+            cv::Vec3d color(1, 1, 1);
+            for (const auto &worldObject: objects) {
+                render(finalFrame, worldObject, translation, rotation, intrinsics, showIds, maxRenderDistance, color);
             }
         }
 
 
         void render(cv::Mat &finalFrame, const static_calibration::objects::DataSet &dataSet,
                     const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                    const std::vector<double> &intrinsics, bool showIds) {
-            static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), translation, rotation, intrinsics,
-                                              showIds);
+                    const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance) {
             static_calibration::utils::render(finalFrame, dataSet.getImageObjects(), showIds);
-
+            static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), translation, rotation, intrinsics,
+                                              showIds, maxRenderDistance);
+            static_calibration::utils::render(finalFrame, dataSet.getExplicitRoadMarks(), translation, rotation,
+                                              intrinsics, showIds, maxRenderDistance);
             static_calibration::utils::renderMapping(finalFrame, dataSet, translation, rotation, intrinsics);
 
         }
@@ -148,22 +198,33 @@ namespace static_calibration {
         renderMapping(const cv::Mat &finalFrame, const objects::DataSet &dataSet, const Eigen::Vector3d &translation,
                       const Eigen::Vector3d &rotation, const std::vector<double> &intrinsics) {
             for (const auto &mapping : dataSet.getMapping()) {
-                int index = dataSet.get<calibration::WorldObject>(mapping.first);
-                auto worldObject = dataSet.getWorldObjects()[index];
+                int worldObjectIndex = dataSet.get<calibration::Object>(mapping.first);
+                int roadMarkIndex = dataSet.get<calibration::RoadMark>(mapping.first);
+
+                calibration::WorldObject worldObject;
+                if (worldObjectIndex != -1) {
+                    worldObject = dataSet.getWorldObjects()[worldObjectIndex];
+                } else if (roadMarkIndex != -1) {
+                    worldObject = dataSet.getExplicitRoadMarks()[roadMarkIndex];
+                } else {
+                    continue;
+                }
                 auto imageObject = dataSet.getImageObjects()[dataSet.get<calibration::ImageObject>(
                         mapping.second)];
 
                 bool flipped;
                 Eigen::Vector2d pixel = camera::render(translation.data(), rotation.data(),
                                                        intrinsics.data(),
-                                                       worldObject.getOrigin().data(),
+                                                       worldObject.getMid().data(),
                                                        flipped);
                 if (flipped) {
                     continue;
                 }
+                auto centerLineSizeHalf = imageObject.getCenterLine().size() / 2;
                 cv::line(finalFrame, cv::Point(pixel.x(), finalFrame.rows - 1 - pixel.y()),
-                         cv::Point(imageObject.getCenterLine()[0].x(),
-                                   finalFrame.rows - 1 - imageObject.getCenterLine()[0].y()), {0, 1, 0});
+                         cv::Point(imageObject.getCenterLine()[centerLineSizeHalf].x(),
+                                   finalFrame.rows - 1 - imageObject.getCenterLine()[centerLineSizeHalf].y()),
+                         {0, 1, 0}, 2);
             }
         }
 

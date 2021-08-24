@@ -50,7 +50,8 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
 
-    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.pixelsFile,
+    auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile, parsedOptions.explicitRoadMarksFile,
+                                                        parsedOptions.pixelsFile,
                                                         parsedOptions.mappingFile);
 
     google::InitGoogleLogging("Static Calibration");
@@ -76,7 +77,9 @@ int main(int argc, char const *argv[]) {
     const char *windowName = "Evaluate Static Calibration";
     cv::namedWindow(windowName);
     int trackbarShowIds = 1;
+    int maxRenderDistance = 600;
     cv::createTrackbar("Show IDs", windowName, &trackbarShowIds, 1);
+    cv::createTrackbar("Render Distance", windowName, &maxRenderDistance, 2000);
 #endif //WITH_OPENCV
 
     Eigen::Vector3d translation;
@@ -111,7 +114,8 @@ int main(int argc, char const *argv[]) {
         intrinsics = estimator->getIntrinsics();
 
         finalFrame = evaluationFrame * 0.5;
-        static_calibration::utils::render(finalFrame, dataSet, translation, rotation, intrinsics, trackbarShowIds);
+        static_calibration::utils::render(finalFrame, dataSet, translation, rotation, intrinsics, trackbarShowIds,
+                                          maxRenderDistance);
         static_calibration::utils::renderText(finalFrame, estimator, run);
 
         cv::imshow(windowName, finalFrame);

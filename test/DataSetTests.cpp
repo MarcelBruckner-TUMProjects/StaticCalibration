@@ -47,8 +47,7 @@ namespace static_calibration {
          * Tests loading the objects from a YAML file.
          */
         TEST_F(ObjectsLoadingTests, testLoadingObjects) {
-            auto dataSet = static_calibration::objects::DataSet::from<calibration::WorldObject>(
-                    "../misc/objects.yaml");
+            auto dataSet = static_calibration::objects::DataSet("../misc/objects.yaml", "", "", "");
             auto objects = dataSet.getWorldObjects();
 
             ASSERT_EQ(objects.size(), 622);
@@ -59,15 +58,14 @@ namespace static_calibration {
             ASSERT_EQ(object.getLength(), 1.21);
 
             assertVectorEqual(object.getOrigin(), -824.04155184631236, 851.03803717531264, -1.5656829808812063);
-            assertVectorEqual(object.getAxisA(), Eigen::Vector3d::UnitZ());
+            assertVectorEqual(object.getAxis(), Eigen::Vector3d::UnitZ());
         }
 
         /**
          * Tests loading the image objects from a YAML file.
          */
         TEST_F(ObjectsLoadingTests, testLoadingImageObjects) {
-            auto dataSet = static_calibration::objects::DataSet::from<ImageObject>(
-                    "../misc/pixels.yaml");
+            auto dataSet = static_calibration::objects::DataSet("", "", "../misc/pixels.yaml", "");
             auto imageObjects = dataSet.getImageObjects();
 
             ASSERT_EQ(imageObjects.size(), 62);
@@ -86,15 +84,28 @@ namespace static_calibration {
             assertVectorEqual(centerLine[centerLine.size() - 1], 504.31818181818181, 1200 - 1036 - 1);
         }
 
+        /**
+         * Tests loading the image objects from a YAML file.
+         */
+        TEST_F(ObjectsLoadingTests, testLoadingExplicitRoadMarks) {
+            auto dataSet = static_calibration::objects::DataSet("", "../misc/road_marks.yaml", "", "");
+            auto roadMarks = dataSet.getWorldObjects();
+            ASSERT_EQ(roadMarks.size(), 4066);
+
+            auto roadMark = roadMarks[0];
+            ASSERT_EQ(roadMark.getId(), "0");
+            ASSERT_EQ(roadMark.getOrigin(), Eigen::Vector3d(-878.08095410547685, 858.91012073215097, -1.5918535499720861));
+            ASSERT_EQ(roadMark.getEnd(), Eigen::Vector3d(-881.07388621976133, 859.10248393658549, -1.6046715488078007));
+        }
 
         /**
          * Tests loading the image objects from a YAML file.
          */
         TEST_F(ObjectsLoadingTests, testMergeObjects) {
-            auto dataset = static_calibration::objects::DataSet("../misc/objects.yaml", "../misc/pixels.yaml",
-                                                                "../misc/mapping.yaml");
+            auto dataset = static_calibration::objects::DataSet("../misc/objects.yaml", "../misc/road_marks.yaml",
+                                                                "../misc/pixels.yaml", "../misc/mapping.yaml");
             const auto &parametricPoints = dataset.getParametricPoints();
-            ASSERT_EQ(parametricPoints.size(), 172);
+            ASSERT_EQ(parametricPoints.size(), 206);
         }
     }
 }

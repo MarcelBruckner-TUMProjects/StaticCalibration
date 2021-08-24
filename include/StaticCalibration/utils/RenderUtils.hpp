@@ -70,7 +70,7 @@ namespace static_calibration {
          */
         void render(cv::Mat &finalFrame, const std::vector<static_calibration::calibration::WorldObject> &objects,
                     const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                    const std::vector<double> &intrinsics, bool showIds);
+                    const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance);
 
         /**
          * Renders the given objects onto the frame.
@@ -84,7 +84,7 @@ namespace static_calibration {
 
         void render(cv::Mat &finalFrame, const static_calibration::objects::DataSet &dataSet,
                     const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                    const std::vector<double> &intrinsics, bool showIds);
+                    const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance);
 
         void
         renderMapping(const cv::Mat &finalFrame, const objects::DataSet &dataSet, const Eigen::Vector3d &translation,
