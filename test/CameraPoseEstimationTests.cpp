@@ -50,7 +50,7 @@ namespace static_calibration {
             }
 
             void addPointCorrespondence(const Eigen::Vector3d &pointInWorldSpace, const std::string &id) {
-                WorldObject worldObject(id, pointInWorldSpace, {0, 0, 0}, 0);
+                Object worldObject(id, pointInWorldSpace, {0, 0, 0}, 0);
                 ImageObject imageObject(id, {getPixel(worldObject.getOrigin())});
                 dataSet.add(worldObject, imageObject);
             }
@@ -81,7 +81,7 @@ namespace static_calibration {
 
                     std::cout << "World worldObjects" << std::endl;
 
-                    for (const auto &point : estimator->getDataSet().getParametricPoints()) {
+                    for (const auto &point : estimator->getDataSet().getParametricPoints<static_calibration::calibration::Object>()) {
                         std::cout << point.getPosition() << std::endl << std::endl;
                     }
                 }
@@ -91,7 +91,7 @@ namespace static_calibration {
                 int number = 5;
                 double height = 1.5;
                 Eigen::Vector3d axis = Eigen::Vector3d::UnitZ();
-                WorldObject postObject(id, origin, axis, height);
+                Object postObject(id, origin, axis, height);
                 ImageObject postImageObject(id);
 
                 for (int i = 0; i < number; ++i) {
@@ -105,7 +105,7 @@ namespace static_calibration {
 
             void addLane(const Eigen::Vector3d &origin, const Eigen::Vector3d &end, std::string id) {
                 int number = 10;
-                WorldObject laneObject(id, origin, end);
+                RoadMark laneObject(id, origin, end);
                 ImageObject laneImageObject(id);
 
                 for (int i = 0; i <= number; i++) {

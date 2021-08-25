@@ -12,7 +12,8 @@ namespace static_calibration {
         class CameraPoseEstimation : public CameraPoseEstimationBase {
         protected:
             ceres::ResidualBlockId
-            addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point) override;
+            addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point,
+                                           ceres::LossFunction *lossFunction) override;
 
         public:
             explicit CameraPoseEstimation(const std::vector<double> &intrinsics);

@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <map>
+#include <opencv2/opencv.hpp>
+#include <StaticCalibration/camera/RenderingPipeline.hpp>
 #include "StaticCalibration/objects/WorldObject.hpp"
 #include "StaticCalibration/objects/ImageObject.hpp"
 
@@ -42,7 +44,12 @@ namespace static_calibration {
             /**
              * Buffer for the parametric points from the mapping of 3D world objects and 2D image objects
              */
-            std::vector<calibration::ParametricPoint> parametricPoints;
+            std::vector<calibration::ParametricPoint> worldObjectsParametricPoints;
+
+            /**
+             * Buffer for the parametric points from the mapping of 3D world objects and 2D image objects
+             */
+            std::vector<calibration::ParametricPoint> explicitRoadMarksParametricPoints;
 
             /**
              * Merges the 3D world objects with the 2D image objects.
@@ -72,23 +79,59 @@ namespace static_calibration {
                     const std::string &mappingFile);
 
             /**
-             * @get
+             * Generates an extended mapping from road marks to all image objects that are near in image space.
+             *
+             * @param translation The translation of the camera.
+             * @param rotation The rotation of the camera.
+             * @param intrinsics The intrinsics of the camera.
+             * @param maxDistance The maximum distance in image space of the projected road mark and the image object.
+             *
+             * @return The mapping from road marks to near image objects.
              */
-            const std::vector<static_calibration::calibration::Object> &getWorldObjects() const;
+            std::map<std::string, std::vector<std::string>>
+            extendMapping(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                          const std::vector<double> &intrinsics, int maxDistance);
+
+            /**
+             * https://www.geeksforgeeks.org/backtracking-to-find-all-subsets/
+             */
+            template<class T>
+            void generateAllSubsets(std::vector<T> &vector, std::vector<std::vector<T> > &result,
+                                    std::vector<T> &subset, int index, int depth, int maxDepth = -1);
+
+            /**
+             * https://www.geeksforgeeks.org/backtracking-to-find-all-subsets/
+             */
+            template<class T>
+            std::vector<std::vector<T>> generateAllSubsets(std::vector<T> &vector, int maxDepth = -1);
+
+            /**
+             * Creates all possible mappings between image objects and road marks.
+             * Be aware that the subset generation is O(n * 2^n), so this is a really slow operation when 'maxElementsPerMapping' is large.
+             *
+             * @param translation The translation of the camera.
+             * @param rotation The rotation of the camera.
+             * @param intrinsics The intrinsics of the camera.
+             * @param maxDistance The maximum distance in image space of the projected road mark and the image object.
+             * @param maxElementsPerMapping The maximal number of elements per mapping.
+             *                              Keep this as small as possible as the time complexity for subset generation is O(n * 2^n)
+             *
+             * @return All possible mappings.
+             */
+            std::vector<std::map<std::string, std::string>>
+            createAllMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                              const std::vector<double> &intrinsics, int maxDistance, int maxElementsPerMapping = -1);
 
             /**
              * @get
              */
-            const std::vector<static_calibration::calibration::RoadMark> &getExplicitRoadMarks() const;
+            template<typename T>
+            const std::vector<T> &get() const;
 
             /**
              * @get
              */
-            const std::vector<static_calibration::calibration::ImageObject> &getImageObjects() const;
-
-            /**
-             * @get
-             */
+            template<typename T>
             const std::vector<calibration::ParametricPoint> &getParametricPoints() const;
 
             /**

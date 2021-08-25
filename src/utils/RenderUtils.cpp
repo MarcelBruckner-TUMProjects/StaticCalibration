@@ -185,10 +185,11 @@ namespace static_calibration {
         void render(cv::Mat &finalFrame, const static_calibration::objects::DataSet &dataSet,
                     const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
                     const std::vector<double> &intrinsics, bool showIds, int maxRenderDistance) {
-            static_calibration::utils::render(finalFrame, dataSet.getImageObjects(), showIds);
-            static_calibration::utils::render(finalFrame, dataSet.getWorldObjects(), translation, rotation, intrinsics,
+            static_calibration::utils::render(finalFrame, dataSet.get<calibration::ImageObject>(), showIds);
+            static_calibration::utils::render(finalFrame, dataSet.get<calibration::Object>(), translation, rotation,
+                                              intrinsics,
                                               showIds, maxRenderDistance);
-            static_calibration::utils::render(finalFrame, dataSet.getExplicitRoadMarks(), translation, rotation,
+            static_calibration::utils::render(finalFrame, dataSet.get<calibration::RoadMark>(), translation, rotation,
                                               intrinsics, showIds, maxRenderDistance);
             static_calibration::utils::renderMapping(finalFrame, dataSet, translation, rotation, intrinsics);
 
@@ -203,13 +204,13 @@ namespace static_calibration {
 
                 calibration::WorldObject worldObject;
                 if (worldObjectIndex != -1) {
-                    worldObject = dataSet.getWorldObjects()[worldObjectIndex];
+                    worldObject = dataSet.get<calibration::Object>()[worldObjectIndex];
                 } else if (roadMarkIndex != -1) {
-                    worldObject = dataSet.getExplicitRoadMarks()[roadMarkIndex];
+                    worldObject = dataSet.get<calibration::RoadMark>()[roadMarkIndex];
                 } else {
                     continue;
                 }
-                auto imageObject = dataSet.getImageObjects()[dataSet.get<calibration::ImageObject>(
+                auto imageObject = dataSet.get<calibration::ImageObject>()[dataSet.get<calibration::ImageObject>(
                         mapping.second)];
 
                 bool flipped;

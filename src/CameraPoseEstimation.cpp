@@ -8,14 +8,15 @@ namespace static_calibration {
     namespace calibration {
 
         ceres::ResidualBlockId
-        CameraPoseEstimation::addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point) {
+        CameraPoseEstimation::addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point,
+                                                             ceres::LossFunction *lossFunction) {
             return problem.AddResidualBlock(
                     residuals::CorrespondenceResidual::create(
                             point.getExpectedPixel(),
                             point,
                             intrinsics
                     ),
-                    new ceres::HuberLoss(1.0),
+                    lossFunction,
                     &translation.x(),
                     &translation.y(),
                     &translation.z(),

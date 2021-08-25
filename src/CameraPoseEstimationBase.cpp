@@ -59,7 +59,7 @@ namespace static_calibration {
 
         Eigen::Vector3d CameraPoseEstimationBase::calculateMean() {
             Eigen::Vector3d meanVector(0, 0, 0);
-            auto parametricPoints = dataSet.getParametricPoints();
+            auto parametricPoints = dataSet.getParametricPoints<Object>();
             for (const auto &worldObject : parametricPoints) {
                 meanVector += worldObject.getOrigin();
             }
@@ -162,7 +162,10 @@ namespace static_calibration {
         }
 
         void CameraPoseEstimationBase::resetParameters() {
-            for (const auto &point : dataSet.getParametricPoints()) {
+            for (const auto &point : dataSet.getParametricPoints<Object>()) {
+                *point.getLambda() = 0;
+            }
+            for (const auto &point : dataSet.getParametricPoints<RoadMark>()) {
                 *point.getLambda() = 0;
             }
         }
@@ -179,9 +182,18 @@ namespace static_calibration {
             weightResiduals.clear();
             lambdaResiduals.clear();
 
-            for (const auto &point : dataSet.getParametricPoints()) {
+            for (const auto &point : dataSet.getParametricPoints<Object>()) {
                 weights.emplace_back(new double(1));
-                correspondenceResiduals.emplace_back(addCorrespondenceResidualBlock(problem, point));
+                correspondenceResiduals.emplace_back(
+                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(2.0)));
+                lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
+                weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
+            }
+
+            for (const auto &point : dataSet.getParametricPoints<RoadMark>()) {
+                weights.emplace_back(new double(1));
+                correspondenceResiduals.emplace_back(
+                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(1.0)));
                 lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
                 weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
             }
@@ -354,7 +366,8 @@ namespace static_calibration {
 
         ceres::ResidualBlockId
         CameraPoseEstimationBase::addCorrespondenceResidualBlock(ceres::Problem &problem,
-                                                                 const ParametricPoint &point) {
+                                                                 const ParametricPoint &point,
+                                                                 ceres::LossFunction *lossFunction) {
             // This is a mock function used only for override.
             return ceres::ResidualBlockId(-1);
         }

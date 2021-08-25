@@ -261,7 +261,8 @@ namespace static_calibration {
              * @return The residual block id.
              */
             virtual ceres::ResidualBlockId
-            addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point);;
+            addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point,
+                                           ceres::LossFunction *lossFunction);
 
             /**
              * Adds a lambda residual block based on the given point to the problem.
@@ -323,9 +324,10 @@ namespace static_calibration {
                  * The current camera [x, y, z] euler angle rotation around the world space axis.
                  */
             Eigen::Vector3d rotation;
+
             /**
-                 * The weights of the correspondence residual blocks.
-                 */
+             * The weights of the correspondence residual blocks.
+             */
             std::vector<double *> weights;
 
             /**

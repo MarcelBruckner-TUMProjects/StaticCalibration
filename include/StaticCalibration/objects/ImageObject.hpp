@@ -29,6 +29,8 @@ namespace static_calibration {
             size_t size() const;
 
             std::vector<Eigen::Vector2d> getCenterLine() const;
+
+            Eigen::Vector2d getMid() const;
         };
     }
 }

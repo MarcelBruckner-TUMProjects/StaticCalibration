@@ -47,7 +47,8 @@ namespace static_calibration {
             ceres::Problem createProblem() override;
 
             ceres::ResidualBlockId
-            addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point) override;
+            addCorrespondenceResidualBlock(ceres::Problem &problem, const ParametricPoint &point,
+                                           ceres::LossFunction *lossFunction) override;
 
         };
     }

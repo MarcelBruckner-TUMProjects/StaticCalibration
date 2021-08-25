@@ -33,13 +33,14 @@ namespace static_calibration {
 
         ceres::ResidualBlockId
         CameraPoseEstimationWithIntrinsics::addCorrespondenceResidualBlock(ceres::Problem &problem,
-                                                                           const ParametricPoint &point) {
+                                                                           const ParametricPoint &point,
+                                                                           ceres::LossFunction *lossFunction) {
             return problem.AddResidualBlock(
                     residuals::CorrespondenceWithIntrinsicsResidual::create(
                             point.getExpectedPixel(),
                             point
                     ),
-                    new ceres::HuberLoss(1.0),
+                    lossFunction,
                     &intrinsics[0],
                     &intrinsics[1],
                     &intrinsics[2],

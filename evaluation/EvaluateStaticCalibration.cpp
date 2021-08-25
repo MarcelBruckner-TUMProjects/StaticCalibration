@@ -119,6 +119,7 @@ int main(int argc, char const *argv[]) {
         static_calibration::utils::renderText(finalFrame, estimator, run);
 
         cv::imshow(windowName, finalFrame);
+
         if ((char) cv::waitKey(1) == 'q') {
             break;
         }

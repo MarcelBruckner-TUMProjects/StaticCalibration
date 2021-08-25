@@ -38,10 +38,10 @@ namespace static_calibration {
             });
 
             std::vector<Eigen::Vector2d> currentRow = {};
-            for (auto &pixel : sortedPixels) {
+            for (auto &pixel: sortedPixels) {
                 if (!currentRow.empty() && pixel.y() != currentRow[0].y()) {
                     Eigen::Vector2d rowMean = {0, 0};
-                    for (const auto &rowElement : currentRow) {
+                    for (const auto &rowElement: currentRow) {
                         rowMean += rowElement;
                     }
                     rowMean /= (int) currentRow.size();
@@ -51,12 +51,20 @@ namespace static_calibration {
                 currentRow.emplace_back(pixel);
             }
             Eigen::Vector2d rowMean = {0, 0};
-            for (const auto &rowElement : currentRow) {
+            for (const auto &rowElement: currentRow) {
                 rowMean += rowElement;
             }
             rowMean /= (int) currentRow.size();
             centerLine.emplace_back(rowMean);
             return centerLine;
+        }
+
+        Eigen::Vector2d ImageObject::getMid() const {
+            Eigen::Vector2d sum(0, 0);
+            for (const auto &pixel: pixels) {
+                sum += pixel;
+            }
+            return sum / pixels.size();
         }
     }
 }
