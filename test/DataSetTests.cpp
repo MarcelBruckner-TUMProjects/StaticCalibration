@@ -43,16 +43,16 @@ namespace static_calibration {
 
                 dataset.add(RoadMark("a", roadMark, roadMark));
                 dataset.add(ImageObject("b", {pixel}));
-                dataset.add(ImageObject("c", {pixel + Eigen::Vector2d(100, 0)}));
-                dataset.add(ImageObject("d", {pixel + Eigen::Vector2d(0, 100)}));
+                dataset.add(ImageObject("d", {pixel + Eigen::Vector2d(100, 0)}));
+                dataset.add(ImageObject("c", {pixel + Eigen::Vector2d(0, 200)}));
 
                 roadMark = Eigen::Vector3d(0, 10, 10);
                 pixel = static_calibration::camera::render(translation.data(), rotation.data(), intrinsics.data(),
                                                            roadMark.data());
                 dataset.add(RoadMark("0", roadMark, roadMark));
                 dataset.add(ImageObject("1", {pixel}));
-                dataset.add(ImageObject("2", {pixel + Eigen::Vector2d(100, 0)}));
-                dataset.add(ImageObject("3", {pixel + Eigen::Vector2d(0, 100)}));
+                dataset.add(ImageObject("2", {pixel + Eigen::Vector2d(0, 200)}));
+                dataset.add(ImageObject("3", {pixel + Eigen::Vector2d(100, 0)}));
 
                 dataset.add(ImageObject("x", {Eigen::Vector2d(0, 0)}));
 
@@ -150,12 +150,28 @@ namespace static_calibration {
         TEST_F(DataSetTests, testExtendMapping) {
             auto dataset = createMockDataSetForMapping();
 
-            auto extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 120);
+            auto extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 210, 3);
 
             ASSERT_EQ(extendedMapping.size(), 2);
-            auto values = std::vector<std::string>{"b", "c", "d"};
+            auto values = std::vector<std::string>{"b", "d", "c"};
             ASSERT_EQ(extendedMapping["a"], values);
-            values = std::vector<std::string>{"1", "2", "3"};
+            values = std::vector<std::string>{"1", "3", "2"};
+            ASSERT_EQ(extendedMapping["0"], values);
+
+            extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 120, 3);
+
+            ASSERT_EQ(extendedMapping.size(), 2);
+            values = std::vector<std::string>{"b", "d"};
+            ASSERT_EQ(extendedMapping["a"], values);
+            values = std::vector<std::string>{"1", "3"};
+            ASSERT_EQ(extendedMapping["0"], values);
+
+            extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 210, 1);
+
+            ASSERT_EQ(extendedMapping.size(), 2);
+            values = std::vector<std::string>{"b"};
+            ASSERT_EQ(extendedMapping["a"], values);
+            values = std::vector<std::string>{"1"};
             ASSERT_EQ(extendedMapping["0"], values);
         }
 
@@ -166,7 +182,7 @@ namespace static_calibration {
         TEST_F(DataSetTests, testAllPossibleMappings) {
             auto dataset = createMockDataSetForMapping();
 
-            auto mappings = dataset.createAllMappings(translation, rotation, intrinsics, 120);
+            auto mappings = dataset.createAllMappings(translation, rotation, intrinsics, 210, 3);
             ASSERT_EQ(mappings.size(), 16);
             ASSERT_TRUE(mappings[0].empty());
 
@@ -175,7 +191,7 @@ namespace static_calibration {
 
             ASSERT_EQ(mappings[13]["a"], "b");
 
-            mappings = dataset.createAllMappings(translation, rotation, intrinsics, 120, 1);
+            mappings = dataset.createAllMappings(translation, rotation, intrinsics, 210, 3, 1);
             ASSERT_EQ(mappings.size(), 7);
             ASSERT_TRUE(mappings[0].empty());
 

@@ -295,8 +295,9 @@ namespace static_calibration {
 
         std::vector<std::map<std::string, std::string>>
         DataSet::createAllMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                                   const std::vector<double> &intrinsics, int maxDistance, int maxElementsPerMapping) {
-            auto extendedMapping = extendMapping(translation, rotation, intrinsics, maxDistance);
+                                   const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance,
+                                   int maxElementsPerMapping) {
+            auto extendedMapping = extendMapping(translation, rotation, intrinsics, maxDistance, maxElementsInDistance);
             std::vector<std::pair<std::string, std::string>> mappings;
 
             for (const auto &entry: extendedMapping) {
@@ -370,8 +371,8 @@ namespace static_calibration {
 
         std::map<std::string, std::vector<std::string>>
         DataSet::extendMapping(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                               const std::vector<double> &intrinsics, int maxDistance) {
-            std::map<std::string, std::vector<std::string>> extendedMapping;
+                               const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance) {
+            std::map<std::string, std::vector<std::pair<double, std::string>>> extendedMapping;
 
             for (const auto &roadMark: explicitRoadMarks) {
                 bool flipped;
@@ -387,13 +388,28 @@ namespace static_calibration {
                                                                 flipped);
 
                 for (const auto &imageObject: imageObjects) {
-                    if ((imageObject.getMid() - pixel).norm() <= maxDistance) {
-                        extendedMapping[roadMark.getId()].emplace_back(imageObject.getId());
+                    double distance = (imageObject.getMid() - pixel).norm();
+                    if (distance <= maxDistance) {
+                        extendedMapping[roadMark.getId()].emplace_back(std::make_pair(distance, imageObject.getId()));
                     }
                 }
             }
 
-            return extendedMapping;
+            std::map<std::string, std::vector<std::string>> result;
+            for (auto &entry: extendedMapping) {
+                std::sort(entry.second.begin(), entry.second.end(),
+                          [](const auto &lhs, const auto &rhs) {
+                              return lhs.first < rhs.first;
+                          });
+                int length = std::min(maxElementsInDistance, (int) entry.second.size());
+                std::vector<std::string> elements(length);
+                for (int i = 0; i < length; i++) {
+                    elements[i] = entry.second[i].second;
+                }
+                result[entry.first] = elements;
+            }
+
+            return result;
         }
 
     }

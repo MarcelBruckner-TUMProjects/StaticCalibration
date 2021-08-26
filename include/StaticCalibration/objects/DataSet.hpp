@@ -90,7 +90,7 @@ namespace static_calibration {
              */
             std::map<std::string, std::vector<std::string>>
             extendMapping(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                          const std::vector<double> &intrinsics, int maxDistance);
+                          const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance);
 
             /**
              * https://www.geeksforgeeks.org/backtracking-to-find-all-subsets/
@@ -120,7 +120,8 @@ namespace static_calibration {
              */
             std::vector<std::map<std::string, std::string>>
             createAllMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                              const std::vector<double> &intrinsics, int maxDistance, int maxElementsPerMapping = -1);
+                              const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance,
+                              int maxElementsPerMapping = -1);
 
             /**
              * @get
