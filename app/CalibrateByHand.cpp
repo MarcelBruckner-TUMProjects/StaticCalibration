@@ -51,17 +51,29 @@ int main(int argc, char const *argv[]) {
     cv::createTrackbar("R [Y]", windowName, &(rotation[1]), 3600);
     cv::createTrackbar("R [Z]", windowName, &(rotation[2]), 3600);
 
+    int i = 0;
+    std::vector<std::map<std::string, std::string>> mappings;
+
     char key = '0';
     while (key != 'q') {
         key = cv::waitKey(1);
-        if (key == 'r') {
-            translation = initialTranslation;
-            rotation = initialRotation;
-        }
         finalFrame = evaluationFrame * 0.5;
 
         Eigen::Vector3d t{(translation[0] - 10000) / 10., (translation[1] - 10000) / 10., (translation[2] - 500) / 10.};
         Eigen::Vector3d r{(rotation[0] - 1800) / 10., (rotation[1] - 1800) / 10., (rotation[2] - 1800) / 10.};
+
+        if (key == 'r') {
+            translation = initialTranslation;
+            rotation = initialRotation;
+        }
+        if (key == 'c') {
+            mappings = dataSet.createAllMappings(t, r, intrinsics, 100, 3, -1);
+        }
+
+        if (!mappings.empty()) {
+            dataSet.setMappingExtension(mappings[i % mappings.size()]);
+            i++;
+        }
 
         static_calibration::utils::render(finalFrame, dataSet, t, r, intrinsics, trackbarShowIds, maxRenderDistance);
         static_calibration::utils::renderText(finalFrame, t, r, 0);

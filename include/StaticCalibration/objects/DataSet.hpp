@@ -42,6 +42,11 @@ namespace static_calibration {
             std::map<std::string, std::string> mapping;
 
             /**
+             * The extension to the mapping from 3D world objects to 2D image objects.
+             */
+            std::map<std::string, std::string> mappingExtension;
+
+            /**
              * Buffer for the parametric points from the mapping of 3D world objects and 2D image objects
              */
             std::vector<calibration::ParametricPoint> worldObjectsParametricPoints;
@@ -55,6 +60,11 @@ namespace static_calibration {
              * Merges the 3D world objects with the 2D image objects.
              */
             void merge();
+
+            /**
+             * @get
+             */
+            const std::map<std::string, std::string> &getMapping() const;
 
         public:
 
@@ -79,18 +89,19 @@ namespace static_calibration {
                     const std::string &mappingFile);
 
             /**
-             * Generates an extended mapping from road marks to all image objects that are near in image space.
+             * Generates an extended mapping from image objects to road marks that are near in image space.
              *
              * @param translation The translation of the camera.
              * @param rotation The rotation of the camera.
              * @param intrinsics The intrinsics of the camera.
              * @param maxDistance The maximum distance in image space of the projected road mark and the image object.
              *
-             * @return The mapping from road marks to near image objects.
+             * @return The mapping from image objects to near road marks.
              */
             std::map<std::string, std::vector<std::string>>
-            extendMapping(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                          const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance);
+            calculateInverseExtendedMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                                             const std::vector<double> &intrinsics, int maxDistance,
+                                             int maxElementsInDistance);
 
             /**
              * https://www.geeksforgeeks.org/backtracking-to-find-all-subsets/
@@ -107,14 +118,14 @@ namespace static_calibration {
 
             /**
              * Creates all possible mappings between image objects and road marks.
-             * Be aware that the subset generation is O(n * 2^n), so this is a really slow operation when 'maxElementsPerMapping' is large.
              *
              * @param translation The translation of the camera.
              * @param rotation The rotation of the camera.
              * @param intrinsics The intrinsics of the camera.
              * @param maxDistance The maximum distance in image space of the projected road mark and the image object.
+             *                              Keep this as small as possible as the time complexity for subset generation is in worst case O(n * 2^n)
              * @param maxElementsPerMapping The maximal number of elements per mapping.
-             *                              Keep this as small as possible as the time complexity for subset generation is O(n * 2^n)
+             *                              Keep this as small as possible as the time complexity for subset generation is in worst case O(n * 2^n)
              *
              * @return All possible mappings.
              */
@@ -135,10 +146,17 @@ namespace static_calibration {
             template<typename T>
             const std::vector<calibration::ParametricPoint> &getParametricPoints() const;
 
+
             /**
-             * @get
+             * @set
              */
-            const std::map<std::string, std::string> &getMapping() const;
+            void setMapping(const std::map<std::string, std::string> &mapping);
+
+            const std::map<std::string, std::string> &getMappingExtension() const;
+
+            void setMappingExtension(const std::map<std::string, std::string> &mappingExtension);
+
+            std::map<std::string, std::string> getMergedMappings() const;
 
             /**
              * Adds an object to the dataset.

@@ -150,29 +150,34 @@ namespace static_calibration {
         TEST_F(DataSetTests, testExtendMapping) {
             auto dataset = createMockDataSetForMapping();
 
-            auto extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 210, 3);
+            auto extendedMapping = dataset.calculateInverseExtendedMappings(translation, rotation, intrinsics, 210, 3);
 
-            ASSERT_EQ(extendedMapping.size(), 2);
-            auto values = std::vector<std::string>{"b", "d", "c"};
-            ASSERT_EQ(extendedMapping["a"], values);
-            values = std::vector<std::string>{"1", "3", "2"};
-            ASSERT_EQ(extendedMapping["0"], values);
+            ASSERT_EQ(extendedMapping.size(), 6);
+            auto values = std::vector<std::string>{"0"};
+            ASSERT_EQ(extendedMapping["1"], values);
+            ASSERT_EQ(extendedMapping["2"], values);
+            ASSERT_EQ(extendedMapping["3"], values);
 
-            extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 120, 3);
+            values = std::vector<std::string>{"a"};
+            ASSERT_EQ(extendedMapping["b"], values);
+            ASSERT_EQ(extendedMapping["c"], values);
+            ASSERT_EQ(extendedMapping["d"], values);
 
-            ASSERT_EQ(extendedMapping.size(), 2);
-            values = std::vector<std::string>{"b", "d"};
-            ASSERT_EQ(extendedMapping["a"], values);
-            values = std::vector<std::string>{"1", "3"};
-            ASSERT_EQ(extendedMapping["0"], values);
+            extendedMapping = dataset.calculateInverseExtendedMappings(translation, rotation, intrinsics, 120, 3);
 
-            extendedMapping = dataset.extendMapping(translation, rotation, intrinsics, 210, 1);
+            ASSERT_EQ(extendedMapping.size(), 4);
+            values = std::vector<std::string>{"0"};
+            ASSERT_EQ(extendedMapping["1"], values);
+            ASSERT_EQ(extendedMapping["3"], values);
 
-            ASSERT_EQ(extendedMapping.size(), 2);
-            values = std::vector<std::string>{"b"};
-            ASSERT_EQ(extendedMapping["a"], values);
-            values = std::vector<std::string>{"1"};
-            ASSERT_EQ(extendedMapping["0"], values);
+            values = std::vector<std::string>{"a"};
+            ASSERT_EQ(extendedMapping["b"], values);
+            ASSERT_EQ(extendedMapping["d"], values);
+
+            extendedMapping = dataset.calculateInverseExtendedMappings(translation, rotation, intrinsics, 210, 0);
+
+            ASSERT_EQ(extendedMapping.size(), 6);
+            ASSERT_EQ(extendedMapping["0"].size(), 0);
         }
 
 

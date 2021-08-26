@@ -198,7 +198,7 @@ namespace static_calibration {
         void
         renderMapping(const cv::Mat &finalFrame, const objects::DataSet &dataSet, const Eigen::Vector3d &translation,
                       const Eigen::Vector3d &rotation, const std::vector<double> &intrinsics) {
-            for (const auto &mapping : dataSet.getMapping()) {
+            for (const auto &mapping: dataSet.getMergedMappings()) {
                 int worldObjectIndex = dataSet.get<calibration::Object>(mapping.first);
                 int roadMarkIndex = dataSet.get<calibration::RoadMark>(mapping.first);
 
@@ -235,7 +235,7 @@ namespace static_calibration {
 
             for (const auto &imageObject: objects) {
                 const auto &pixels = imageObject.getPixels();
-                for (const auto &pixel : pixels) {
+                for (const auto &pixel: pixels) {
                     finalFrame.at<cv::Vec4d>(cv::Point((int) pixel.x(), int(imageHeight - pixel.y()))) =
                             cv::Vec4d(1, 0, 0, 1);
                 }

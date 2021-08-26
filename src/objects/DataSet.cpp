@@ -166,6 +166,7 @@ namespace static_calibration {
             worldObjects.clear();
             imageObjects.clear();
             mapping.clear();
+            mappingExtension.clear();
         }
 
         template<>
@@ -282,7 +283,7 @@ namespace static_calibration {
         void DataSet::merge() {
             worldObjectsParametricPoints.clear();
             explicitRoadMarksParametricPoints.clear();
-            for (const auto &entry: mapping) {
+            for (const auto &entry: getMergedMappings()) {
                 auto imageObjectPtr = get<calibration::ImageObject>(entry.second);
                 merge<calibration::Object>(get<calibration::Object>(entry.first), imageObjectPtr);
                 merge<calibration::RoadMark>(get<calibration::RoadMark>(entry.first), imageObjectPtr);
@@ -297,7 +298,8 @@ namespace static_calibration {
         DataSet::createAllMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
                                    const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance,
                                    int maxElementsPerMapping) {
-            auto extendedMapping = extendMapping(translation, rotation, intrinsics, maxDistance, maxElementsInDistance);
+            auto extendedMapping = calculateInverseExtendedMappings(translation, rotation, intrinsics, maxDistance,
+                                                                    maxElementsInDistance);
             std::vector<std::pair<std::string, std::string>> mappings;
 
             for (const auto &entry: extendedMapping) {
@@ -307,30 +309,15 @@ namespace static_calibration {
                 }
             }
 
-            std::vector<std::map<std::string, std::string>> result;
-            for (const auto &subset: generateAllSubsets(mappings, maxElementsPerMapping)) {
-                bool badSubset = false;
-                for (int i = 0; i < subset.size(); i++) {
-                    if (badSubset) {
-                        break;
-                    }
-                    for (int j = 0; j < subset.size(); j++) {
-                        if (i == j) {
-                            continue;
-                        }
-                        if (subset[i].first == subset[j].first) {
-                            badSubset = true;
-                            break;
-                        }
-                    }
+            auto allSubsets = generateAllSubsets(mappings, maxElementsPerMapping);
+            std::cout << "Subsets: " << allSubsets.size() << std::endl;
+            std::vector<std::map<std::string, std::string>> result(allSubsets.size());
+            int i = 0;
+            for (const auto &subset: allSubsets) {
+                for (const auto &entry: subset) {
+                    result[i][entry.second] = entry.first;
                 }
-                if (!badSubset) {
-                    std::map<std::string, std::string> r;
-                    for (const auto &entry: subset) {
-                        r[entry.first] = entry.second;
-                    }
-                    result.emplace_back(r);
-                }
+                ++i;
             }
 
             return result;
@@ -357,8 +344,23 @@ namespace static_calibration {
             result.push_back(subset);
             for (int i = index; i < vector.size(); i++) {
 
+                auto current = vector[i];
+
+                bool alreadyIn = false;
+                for (const auto &s: subset) {
+                    if (s.first == current.first || s.second == current.second) {
+                        alreadyIn = true;
+                        break;
+                    }
+                }
+                if (alreadyIn) {
+                    continue;
+                }
+
+                std::cout << "Depth: " << depth << " - Index: " << i << std::endl;
+
                 // include the vector[i] in subset.
-                subset.push_back(vector[i]);
+                subset.push_back(current);
 
                 // move onto the next element.
                 generateAllSubsets(vector, result, subset, i + 1, depth + 1, maxDepth);
@@ -370,27 +372,39 @@ namespace static_calibration {
         }
 
         std::map<std::string, std::vector<std::string>>
-        DataSet::extendMapping(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                               const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance) {
+        DataSet::calculateInverseExtendedMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                                                  const std::vector<double> &intrinsics, int maxDistance,
+                                                  int maxElementsInDistance) {
             std::map<std::string, std::vector<std::pair<double, std::string>>> extendedMapping;
 
-            for (const auto &roadMark: explicitRoadMarks) {
-                bool flipped;
-                Eigen::Vector3d mid = roadMark.getMid();
-                auto roadMarkInCameraSpace = static_calibration::camera::toCameraSpace(translation.data(),
-                                                                                       rotation.data(), mid.data());
-                if (roadMarkInCameraSpace.z() < 0 || roadMarkInCameraSpace.z() > 1000) {
+            for (const auto &imageObject: imageObjects) {
+                bool alreadyMapped = false;
+                for (const auto &m: mapping) {
+                    if (m.second == imageObject.getId()) {
+                        alreadyMapped = true;
+                        break;
+                    }
+                }
+                if (alreadyMapped) {
                     continue;
                 }
 
-                auto pixel = static_calibration::camera::render(translation.data(), rotation.data(),
-                                                                intrinsics.data(), mid.data(),
-                                                                flipped);
+                for (const auto &roadMark: explicitRoadMarks) {
+                    bool flipped;
+                    Eigen::Vector3d mid = roadMark.getMid();
+                    auto roadMarkInCameraSpace = static_calibration::camera::toCameraSpace(translation.data(),
+                                                                                           rotation.data(), mid.data());
+                    if (roadMarkInCameraSpace.z() < 0 || roadMarkInCameraSpace.z() > 1000) {
+                        continue;
+                    }
 
-                for (const auto &imageObject: imageObjects) {
+                    auto pixel = static_calibration::camera::render(translation.data(), rotation.data(),
+                                                                    intrinsics.data(), mid.data(),
+                                                                    flipped);
+
                     double distance = (imageObject.getMid() - pixel).norm();
                     if (distance <= maxDistance) {
-                        extendedMapping[roadMark.getId()].emplace_back(std::make_pair(distance, imageObject.getId()));
+                        extendedMapping[imageObject.getId()].emplace_back(std::make_pair(distance, roadMark.getId()));
                     }
                 }
             }
@@ -410,6 +424,26 @@ namespace static_calibration {
             }
 
             return result;
+        }
+
+        void DataSet::setMapping(const std::map<std::string, std::string> &mapping) {
+            DataSet::mapping = mapping;
+            merge();
+        }
+
+        const std::map<std::string, std::string> &DataSet::getMappingExtension() const {
+            return mappingExtension;
+        }
+
+        void DataSet::setMappingExtension(const std::map<std::string, std::string> &mappingExtension) {
+            DataSet::mappingExtension = mappingExtension;
+            merge();
+        }
+
+        std::map<std::string, std::string> DataSet::getMergedMappings() const {
+            std::map<std::string, std::string> merged = mapping;
+            merged.insert(mappingExtension.begin(), mappingExtension.end());
+            return merged;
         }
 
     }
