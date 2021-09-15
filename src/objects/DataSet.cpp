@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <iostream>
+#include <random>
 #include "StaticCalibration/objects/YAMLExtension.hpp"
 
 namespace static_calibration {
@@ -297,7 +298,7 @@ namespace static_calibration {
         std::vector<std::map<std::string, std::string>>
         DataSet::createAllMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
                                    const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance,
-                                   int maxElementsPerMapping) {
+                                   int maxElementsPerMapping, bool sort, bool keepOnlyLongest, bool shuffle) {
             auto extendedMapping = calculateInverseExtendedMappings(translation, rotation, intrinsics, maxDistance,
                                                                     maxElementsInDistance);
             std::vector<std::pair<std::string, std::string>> mappings;
@@ -310,7 +311,7 @@ namespace static_calibration {
             }
 
             auto allSubsets = generateAllSubsets(mappings, maxElementsPerMapping);
-            std::cout << "Subsets: " << allSubsets.size() << std::endl;
+//            std::cout << "Subsets: " << allSubsets.size() << std::endl;
             std::vector<std::map<std::string, std::string>> result(allSubsets.size());
             int i = 0;
             for (const auto &subset: allSubsets) {
@@ -318,6 +319,23 @@ namespace static_calibration {
                     result[i][entry.second] = entry.first;
                 }
                 ++i;
+            }
+
+            if (sort || keepOnlyLongest) {
+                std::sort(result.begin(), result.end(), [](const auto &lhs, const auto &rhs) {
+                    return lhs.size() > rhs.size();
+                });
+            }
+
+            if (keepOnlyLongest) {
+                auto maxSize = result[0].size();
+                result.erase(std::remove_if(result.begin(), result.end(), [maxSize](const auto &value) {
+                    return value.size() != maxSize;
+                }), result.end());
+            }
+
+            if (shuffle) {
+                std::shuffle(result.begin(), result.end(), std::default_random_engine{});
             }
 
             return result;
@@ -357,7 +375,7 @@ namespace static_calibration {
                     continue;
                 }
 
-                std::cout << "Depth: " << depth << " - Index: " << i << std::endl;
+//                std::cout << "Depth: " << depth << " - Index: " << i << std::endl;
 
                 // include the vector[i] in subset.
                 subset.push_back(current);

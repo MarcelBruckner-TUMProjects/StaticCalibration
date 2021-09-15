@@ -2,7 +2,7 @@
 // Created by brucknem on 18.01.21.
 //
 
-#include "CSVWriter.hpp"
+#include "StaticCalibration/utils/CSVWriter.hpp"
 
 #include <utility>
 #include <iomanip>
@@ -62,6 +62,7 @@ namespace static_calibration {
         }
 
 #ifdef WITH_OPENCV
+
         CSVWriter &CSVWriter::operator<<(const cv::Rect &val) {
             *this << val.x << val.y << val.width << val.height;
             return *this;
@@ -71,10 +72,11 @@ namespace static_calibration {
             *this << val.x << val.y;
             return *this;
         }
+
 #endif //WITH_OPENCV
 
         CSVWriter &CSVWriter::operator<<(const std::vector<double> &val) {
-            for (const auto &v : val) {
+            for (const auto &v: val) {
                 *this << v;
             }
             return *this;

@@ -22,6 +22,11 @@ namespace static_calibration {
         struct ParsedOptions {
 
             /**
+             * The path to the output directory.
+             */
+            std::string outputDir;
+
+            /**
              * The path to the objects file containing the world objects.
              */
             std::string objectsFile;

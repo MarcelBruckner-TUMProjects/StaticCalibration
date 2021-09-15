@@ -9,17 +9,6 @@
 namespace static_calibration {
     namespace utils {
 
-        std::string toYAML(const calibration::CameraPoseEstimationWithIntrinsics &estimator) {
-            YAML::Emitter out;
-            out << YAML::BeginMap;
-            out << YAML::Key << "intrinsics";
-            out << YAML::Comment("f_x, ratio, c_x, c_y, skew");
-            out << YAML::Value << estimator.getIntrinsics();
-            out << YAML::EndMap;
-            return toYAML((calibration::CameraPoseEstimationBase) estimator) + "\n"
-                   + out.c_str();
-        }
-
         std::string toYAML(const calibration::CameraPoseEstimationBase &estimator) {
             YAML::Emitter out;
             out << YAML::BeginMap;
@@ -37,6 +26,10 @@ namespace static_calibration {
             auto rotation = estimator.getRotation();
             out << YAML::Value << rotation.x() << rotation.y() << rotation.z();
             out << YAML::EndSeq;
+
+            out << YAML::Key << "intrinsics";
+            out << YAML::Comment("f_x, ratio, c_x, c_y, skew");
+            out << YAML::Value << estimator.getIntrinsics();
 
             out << YAML::EndMap;
             return out.c_str();
@@ -99,7 +92,7 @@ namespace static_calibration {
         }
 
         std::string
-        toROSParamsIntrinsics(const calibration::CameraPoseEstimationWithIntrinsics &estimator,
+        toROSParamsIntrinsics(const calibration::CameraPoseEstimationBase &estimator,
                               const std::string &measurementPoint,
                               const std::string &cameraName) {
             auto intrinsics = estimator.getIntrinsics();

@@ -10,7 +10,6 @@
 
 namespace static_calibration {
     namespace utils {
-        std::string toYAML(const calibration::CameraPoseEstimationWithIntrinsics &estimator);
 
         std::string toYAML(const static_calibration::calibration::CameraPoseEstimationBase &estimator);
 
@@ -19,7 +18,7 @@ namespace static_calibration {
                      const std::string &cameraName);
 
         std::string
-        toROSParamsIntrinsics(const calibration::CameraPoseEstimationWithIntrinsics &estimator,
+        toROSParamsIntrinsics(const calibration::CameraPoseEstimationBase &estimator,
                               const std::string &measurementPoint,
                               const std::string &cameraName);
     }

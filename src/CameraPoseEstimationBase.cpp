@@ -60,7 +60,7 @@ namespace static_calibration {
         Eigen::Vector3d CameraPoseEstimationBase::calculateMean() {
             Eigen::Vector3d meanVector(0, 0, 0);
             auto parametricPoints = dataSet.getParametricPoints<Object>();
-            for (const auto &worldObject : parametricPoints) {
+            for (const auto &worldObject: parametricPoints) {
                 meanVector += worldObject.getOrigin();
             }
             return meanVector / parametricPoints.size();
@@ -78,6 +78,7 @@ namespace static_calibration {
             Solve(options, &problem, &summary);
             evaluateAllResiduals(problem);
             evaluateCorrespondenceResiduals(problem);
+            evaluateExplicitRoadMarkResiduals(problem);
             evaluateLambdaResiduals(problem);
             evaluateRotationResiduals(problem);
             evaluateWeightResiduals(problem);
@@ -108,9 +109,23 @@ namespace static_calibration {
                 calculateInitialGuess();
                 solveProblem(logSummary);
 
-                bool invalidCorrespondencesLoss =
-                        correspondencesLoss > getCorrespondenceLossUpperBound();
-                if (lambdasLoss > 10 || rotationsLoss > 1e-6 || invalidCorrespondencesLoss || intrinsicsLoss > 5) {
+                bool invalidSolution = rotationsLoss > 1e-6 || intrinsicsLoss > 5;
+                bool invalidCorrespondencesLoss = correspondencesLoss > getCorrespondenceLossUpperBound();
+//                invalidSolution = invalidSolution || invalidCorrespondencesLoss;
+//                bool invalidLambdas = lambdasLoss > 10;
+                double rotationDiff = (initialRotation - rotation).norm();
+//                std::cout << rotationDiff << std::endl;
+                bool invalidRotation = rotationDiff > 50;
+                double translationDiff = (initialTranslation - translation).norm();
+//                std::cout << translationDiff << std::endl;
+                bool invalidTranslation = translationDiff > 100;
+
+//                invalidSolution = invalidSolution || invalidLambdas;
+//                invalidSolution = invalidSolution || invalidCorrespondencesLoss;
+                invalidSolution = invalidSolution || invalidTranslation;
+                invalidSolution = invalidSolution || invalidRotation;
+
+                if (invalidSolution) {
                     continue;
                 }
                 double originalPenalize = lambdaResidualScalingFactor;
@@ -119,6 +134,7 @@ namespace static_calibration {
                 lambdaResidualScalingFactor = originalPenalize;
                 break;
             }
+
             foundValidSolution = i < maxTriesUntilAbort;
             optimizationFinished = true;
             if (logSummary) {
@@ -162,10 +178,10 @@ namespace static_calibration {
         }
 
         void CameraPoseEstimationBase::resetParameters() {
-            for (const auto &point : dataSet.getParametricPoints<Object>()) {
+            for (const auto &point: dataSet.getParametricPoints<Object>()) {
                 *point.getLambda() = 0;
             }
-            for (const auto &point : dataSet.getParametricPoints<RoadMark>()) {
+            for (const auto &point: dataSet.getParametricPoints<RoadMark>()) {
                 *point.getLambda() = 0;
             }
         }
@@ -174,25 +190,26 @@ namespace static_calibration {
         // TODO This should remove the memory leak!!!
         ceres::Problem CameraPoseEstimationBase::createProblem() {
             auto problem = ceres::Problem();
-            for (auto p : weights) {
+            for (auto p: weights) {
                 delete p;
             }
             weights.clear();
             correspondenceResiduals.clear();
+            explicitRoadMarkResiduals.clear();
             weightResiduals.clear();
             lambdaResiduals.clear();
 
-            for (const auto &point : dataSet.getParametricPoints<Object>()) {
+            for (const auto &point: dataSet.getParametricPoints<Object>()) {
                 weights.emplace_back(new double(1));
                 correspondenceResiduals.emplace_back(
-                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(2.0)));
+                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(100.0)));
                 lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
                 weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
             }
 
-            for (const auto &point : dataSet.getParametricPoints<RoadMark>()) {
+            for (const auto &point: dataSet.getParametricPoints<RoadMark>()) {
                 weights.emplace_back(new double(1));
-                correspondenceResiduals.emplace_back(
+                explicitRoadMarkResiduals.emplace_back(
                         addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(1.0)));
                 lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
                 weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
@@ -236,17 +253,29 @@ namespace static_calibration {
             ));
         }
 
+        template<>
         void CameraPoseEstimationBase::guessRotation(const Eigen::Vector3d &value) {
             hasRotationGuess = true;
             initialRotation = value;
             rotation = value;
         }
 
+        template<>
         void CameraPoseEstimationBase::guessTranslation(const Eigen::Vector3d &value) {
             hasTranslationGuess = true;
             initialTranslation = value;
             translation = value;
             initialDistanceFromMean = 0;
+        }
+
+        template<>
+        void CameraPoseEstimationBase::guessRotation(const std::vector<double> &value) {
+            guessRotation<Eigen::Vector3d>(Eigen::Vector3d(value.data()));
+        }
+
+        template<>
+        void CameraPoseEstimationBase::guessTranslation(const std::vector<double> &value) {
+            guessTranslation<Eigen::Vector3d>(Eigen::Vector3d(value.data()));
         }
 
         bool CameraPoseEstimationBase::isEstimationFinished() const {
@@ -328,6 +357,10 @@ namespace static_calibration {
             correspondencesLoss = evaluate(problem, correspondenceResiduals);
         }
 
+        void CameraPoseEstimationBase::evaluateExplicitRoadMarkResiduals(ceres::Problem &problem) {
+            explicitRoadMarksLoss = evaluate(problem, explicitRoadMarkResiduals);
+        }
+
         void CameraPoseEstimationBase::evaluateLambdaResiduals(ceres::Problem &problem) {
             lambdasLoss = evaluate(problem, lambdaResiduals);
         }
@@ -350,6 +383,10 @@ namespace static_calibration {
 
         double CameraPoseEstimationBase::getCorrespondencesLoss() const {
             return correspondencesLoss;
+        }
+
+        double CameraPoseEstimationBase::getExplicitRoadMarksLoss() const {
+            return explicitRoadMarksLoss;
         }
 
         double CameraPoseEstimationBase::getRotationsLoss() const {

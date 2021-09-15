@@ -51,7 +51,6 @@ int main(int argc, char const *argv[]) {
     cv::createTrackbar("R [Y]", windowName, &(rotation[1]), 3600);
     cv::createTrackbar("R [Z]", windowName, &(rotation[2]), 3600);
 
-    int i = 0;
     std::vector<std::map<std::string, std::string>> mappings;
 
     char key = '0';
@@ -67,12 +66,12 @@ int main(int argc, char const *argv[]) {
             rotation = initialRotation;
         }
         if (key == 'c') {
-            mappings = dataSet.createAllMappings(t, r, intrinsics, 100, 3, -1);
+            mappings = dataSet.createAllMappings(t, r, intrinsics, 1000, 3, -1);
         }
 
         if (!mappings.empty()) {
-            dataSet.setMappingExtension(mappings[i % mappings.size()]);
-            i++;
+            dataSet.setMappingExtension(mappings[mappings.size() - 1]);
+            mappings.pop_back();
         }
 
         static_calibration::utils::render(finalFrame, dataSet, t, r, intrinsics, trackbarShowIds, maxRenderDistance);

@@ -59,6 +59,11 @@ namespace static_calibration {
             std::vector<ceres::ResidualBlockId> correspondenceResiduals;
 
             /**
+             * The ids of the correspondence residual blocks.
+             */
+            std::vector<ceres::ResidualBlockId> explicitRoadMarkResiduals;
+
+            /**
              * The ids of the weight residual blocks.
              */
             std::vector<ceres::ResidualBlockId> weightResiduals;
@@ -151,6 +156,11 @@ namespace static_calibration {
             double correspondencesLoss = 0;
 
             /**
+             * The final loss of the explicit road mark residuals after optimization.
+             */
+            double explicitRoadMarksLoss = 0;
+
+            /**
              * The final loss of the rotation residuals after optimization.
              */
             double rotationsLoss = 0;
@@ -208,6 +218,15 @@ namespace static_calibration {
              * @return The loss of the residuals.
              */
             void evaluateCorrespondenceResiduals(ceres::Problem &problem);
+
+            /**
+             * Evaluates the problem for the explicit road marks residuals.
+             *
+             * @param problem The ceres problem.
+             *
+             * @return The loss of the residuals.
+             */
+            void evaluateExplicitRoadMarkResiduals(ceres::Problem &problem);
 
             /**
              * Evaluates the problem for the weight residuals.
@@ -397,13 +416,15 @@ namespace static_calibration {
              * Set an initial guess for the camera translation in world space.
              * @param translation The guess.
              */
-            void guessTranslation(const Eigen::Vector3d &translation);
+            template<typename T>
+            void guessTranslation(const T &translation);
 
             /**
              * Set an initial guess for the camera rotation in world space.
              * @param translation The guess.
              */
-            void guessRotation(const Eigen::Vector3d &rotation);
+            template<typename T>
+            void guessRotation(const T &rotation);
 
             /**
              * @get
@@ -460,6 +481,11 @@ namespace static_calibration {
              * @get
              */
             double getCorrespondencesLoss() const;
+
+            /**
+             * @get
+             */
+            double getExplicitRoadMarksLoss() const;
 
             /**
              * @get

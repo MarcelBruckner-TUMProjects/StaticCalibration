@@ -42,6 +42,8 @@ add_library(StaticCalibration-lib
         utils/CommandLineParser.cpp
         utils/Formatters.cpp
         utils/RenderUtils.cpp
+        utils/CSVWriter.cpp
+
         objects/ImageObject.cpp
         objects/DataSet.cpp
         )

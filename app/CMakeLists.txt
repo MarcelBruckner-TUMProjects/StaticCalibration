@@ -13,10 +13,10 @@ include_directories(${PROJECT_SOURCE_DIR}/extern)
 ### App ###
 ########################################################################################################################
 
-add_executable(StaticCalibration StaticCalibration.cpp)
-target_link_libraries(StaticCalibration StaticCalibration-lib Eigen3::Eigen yaml-cpp)
-target_include_directories(StaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")
-
 add_executable(CalibrateByHand CalibrateByHand.cpp)
 target_link_libraries(CalibrateByHand StaticCalibration-lib Eigen3::Eigen yaml-cpp)
 target_include_directories(CalibrateByHand PUBLIC "${PROJECT_BINARY_DIR}")
+
+add_executable(StaticCalibration StaticCalibration.cpp)
+target_link_libraries(StaticCalibration StaticCalibration-lib Eigen3::Eigen yaml-cpp)
+target_include_directories(StaticCalibration PUBLIC "${PROJECT_BINARY_DIR}")

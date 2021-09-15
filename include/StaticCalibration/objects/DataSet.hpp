@@ -132,7 +132,8 @@ namespace static_calibration {
             std::vector<std::map<std::string, std::string>>
             createAllMappings(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
                               const std::vector<double> &intrinsics, int maxDistance, int maxElementsInDistance,
-                              int maxElementsPerMapping = -1);
+                              int maxElementsPerMapping = -1, bool sort = true, bool keepOnlyLongest = true,
+                              bool shuffle = true);
 
             /**
              * @get

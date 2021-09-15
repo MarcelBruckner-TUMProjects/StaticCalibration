@@ -99,6 +99,7 @@ namespace static_calibration {
 
             ParsedOptions parsedOptions;
             parsedOptions = ParsedOptions{
+                    prefixFile(basepath, getOrThrow<std::string>(config, "output_dir")),
                     prefixFile(basepath, getOrThrow<std::string>(config, "objects_file")),
                     prefixFile(basepath, getOrThrow<std::string>(config, "pixels_file")),
                     prefixFile(basepath, getOrThrow<std::string>(config, "mapping_file")),

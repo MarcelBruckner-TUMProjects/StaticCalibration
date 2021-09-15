@@ -192,7 +192,6 @@ namespace static_calibration {
             static_calibration::utils::render(finalFrame, dataSet.get<calibration::RoadMark>(), translation, rotation,
                                               intrinsics, showIds, maxRenderDistance);
             static_calibration::utils::renderMapping(finalFrame, dataSet, translation, rotation, intrinsics);
-
         }
 
         void
@@ -261,6 +260,16 @@ namespace static_calibration {
             cv::Mat result;
             cv::merge(matChannels, result);
             result.convertTo(result, CV_64FC4, 1. / 255.);
+            return result;
+        }
+
+        cv::Mat removeAlphaChannel(const cv::Mat &mat) {
+            std::vector<cv::Mat> matChannels;
+            cv::split(mat, matChannels);
+
+            cv::Mat result;
+            cv::merge(std::vector<cv::Mat>(matChannels.begin(), matChannels.end() - 1), result);
+            result.convertTo(result, CV_8UC3, 255);
             return result;
         }
 

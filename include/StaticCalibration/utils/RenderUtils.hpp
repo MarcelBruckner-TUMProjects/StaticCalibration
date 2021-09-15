@@ -99,6 +99,8 @@ namespace static_calibration {
          */
         cv::Mat addAlphaChannel(const cv::Mat &mat);
 
+        cv::Mat removeAlphaChannel(const cv::Mat &mat);
+
         std::vector<double> translationToROStf2(std::vector<double> translation, bool inverse = false);
 
         Eigen::Vector3d translationToROStf2(const Eigen::Vector3d &translation, bool inverse = false);
