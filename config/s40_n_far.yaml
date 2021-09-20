@@ -16,4 +16,4 @@ evaluation_runs: 1000
 log_optimization: True
 max_pixel_distance_for_mapping: 1000
 max_matches_per_image_object: 3
-max_new_elements_per_mapping: 2
+max_new_elements_per_mapping: 4

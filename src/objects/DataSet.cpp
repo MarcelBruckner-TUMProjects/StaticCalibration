@@ -480,8 +480,22 @@ namespace static_calibration {
                                  const Eigen::Vector3d &rotation,
                                  const std::vector<double> &intrinsics) const {
             double error = 0;
-            for (const auto &entry: getMapping()) {
+            for (const auto &entry: getMergedMappings()) {
+                calibration::WorldObject worldObject;
+                bool isRoadMark;
                 int worldObjPtr = get<calibration::Object>(entry.first);
+                if (worldObjPtr >= 0) {
+                    worldObject = worldObjects[worldObjPtr];
+                    isRoadMark = false;
+                } else {
+                    worldObjPtr = get<calibration::RoadMark>(entry.first);
+                    if (worldObjPtr >= 0) {
+                        worldObject = explicitRoadMarks[worldObjPtr];
+                        isRoadMark = true;
+                    } else {
+                        continue;
+                    }
+                }
                 int imgObjPtr = get<calibration::ImageObject>(entry.second);
                 if (imgObjPtr < 0 || worldObjPtr < 0) {
                     continue;
@@ -489,13 +503,16 @@ namespace static_calibration {
                 bool flipped;
                 auto actualPixel = static_calibration::camera::render(translation.data(), rotation.data(),
                                                                       intrinsics.data(),
-                                                                      worldObjects[worldObjPtr].getOrigin().data(),
+                                                                      worldObject.getOrigin().data(),
                                                                       flipped);
                 if (flipped) {
                     error += 1e6;
                 }
                 auto expectedPixel = imageObjects[imgObjPtr].getMid();
                 double distance = (actualPixel - expectedPixel).norm();
+                if (isRoadMark) {
+                    distance *= 10;
+                }
                 error += distance;
             }
 

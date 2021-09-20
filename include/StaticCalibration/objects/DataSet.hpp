@@ -208,6 +208,11 @@ namespace static_calibration {
             double evaluate(const Eigen::Vector3d &translation,
                             const Eigen::Vector3d &rotation,
                             const std::vector<double> &intrinsics) const;
+
+            double
+            evaluate(const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
+                     const std::vector<double> &intrinsics,
+                     const std::pair<const std::string, std::string> &entry) const;
         };
     }
 }

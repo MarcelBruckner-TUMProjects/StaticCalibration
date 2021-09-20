@@ -155,6 +155,7 @@ int main(int argc, char const *argv[]) {
                     initialTranslation = translation;
                     initialRotation = rotation;
                     initialIntrinsics = intrinsics;
+                    std::cout << "Creating mappings. This might take some minutes." << std::endl;
                     mappings = dataSet.createAllMappings(translation, rotation, intrinsics,
                                                          parsedOptions.maxPixelDistanceForMapping,
                                                          parsedOptions.maxMatchesPerImageObject,

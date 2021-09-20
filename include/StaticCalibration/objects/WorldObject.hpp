@@ -101,6 +101,10 @@ namespace static_calibration {
                 return lhs.getId() == rhs.getId();
             }
 
+            friend inline bool operator==(const WorldObject &lhs, const std::string &id) {
+                return lhs.getId() == id;
+            }
+
         };
 
         /**

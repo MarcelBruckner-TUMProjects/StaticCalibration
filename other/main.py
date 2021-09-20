@@ -6,6 +6,9 @@ from pathlib import Path
 def plot(path=""):
     path = Path(path).absolute()
     print(f'Reading {path}')
+    if not path.exists():
+        print(f'{path} does not exist')
+        return
     paths = [p for p in path.iterdir() if not p.is_file()]
     paths = [(p, float(p.name)) for p in paths]
     paths = sorted(paths, key=lambda tup: tup[1])
