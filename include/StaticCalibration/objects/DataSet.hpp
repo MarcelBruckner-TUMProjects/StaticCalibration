@@ -9,6 +9,7 @@
 #include <map>
 #include <opencv2/opencv.hpp>
 #include <StaticCalibration/camera/RenderingPipeline.hpp>
+#include <StaticCalibration/residuals/CorrespondenceResidual.hpp>
 #include "StaticCalibration/objects/WorldObject.hpp"
 #include "StaticCalibration/objects/ImageObject.hpp"
 
@@ -61,11 +62,6 @@ namespace static_calibration {
              */
             void merge();
 
-            /**
-             * @get
-             */
-            const std::map<std::string, std::string> &getMapping() const;
-
         public:
 
             /**
@@ -107,14 +103,17 @@ namespace static_calibration {
              * https://www.geeksforgeeks.org/backtracking-to-find-all-subsets/
              */
             template<class T>
-            void generateAllSubsets(std::vector<T> &vector, std::vector<std::vector<T> > &result,
-                                    std::vector<T> &subset, int index, int depth, int maxDepth = -1);
+            void generateAllSubsets(std::vector<T> &vector,
+                                    std::vector<std::vector<T>> &result,
+                                    std::vector<T> &subset, int index, int depth,
+                                    int maxDepth = -1);
 
             /**
              * https://www.geeksforgeeks.org/backtracking-to-find-all-subsets/
              */
             template<class T>
-            std::vector<std::vector<T>> generateAllSubsets(std::vector<T> &vector, int maxDepth = -1);
+            std::vector<std::vector<T>>
+            generateAllSubsets(std::vector<T> &vector, int maxDepth = -1);
 
             /**
              * Creates all possible mappings between image objects and road marks.
@@ -187,9 +186,29 @@ namespace static_calibration {
 
             template<typename T>
             void merge(int worldObjectIndex, int imageObjectIndex);
+
+
+            template<typename T>
+            void generateAllSubsets(std::vector<T> &vector,
+                                    std::vector<std::vector<T>> &result,
+                                    std::vector<T> &subset,
+                                    int maxDepth);
+
+            template<typename T>
+            void generateSubset(std::vector<T> &vector,
+                                std::vector<std::vector<T>> &result,
+                                std::vector<T> &subset, int i,
+                                int depth, int maxDepth);
+
+            /**
+                 * @get
+                 */
+            const std::map<std::string, std::string> &getMapping() const;
+
+            double evaluate(const Eigen::Vector3d &translation,
+                            const Eigen::Vector3d &rotation,
+                            const std::vector<double> &intrinsics) const;
         };
-
-
     }
 }
 

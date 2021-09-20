@@ -109,7 +109,8 @@ namespace static_calibration {
                 calculateInitialGuess();
                 solveProblem(logSummary);
 
-                bool invalidSolution = rotationsLoss > 1e-6 || intrinsicsLoss > 5;
+                bool invalidSolution = false;
+                bool invalidLosses = rotationsLoss > 1e-6 || intrinsicsLoss > 5;
                 bool invalidCorrespondencesLoss = correspondencesLoss > getCorrespondenceLossUpperBound();
 //                invalidSolution = invalidSolution || invalidCorrespondencesLoss;
 //                bool invalidLambdas = lambdasLoss > 10;
@@ -122,6 +123,7 @@ namespace static_calibration {
 
 //                invalidSolution = invalidSolution || invalidLambdas;
 //                invalidSolution = invalidSolution || invalidCorrespondencesLoss;
+//                invalidSolution = invalidSolution || invalidLosses;
                 invalidSolution = invalidSolution || invalidTranslation;
                 invalidSolution = invalidSolution || invalidRotation;
 
@@ -129,7 +131,7 @@ namespace static_calibration {
                     continue;
                 }
                 double originalPenalize = lambdaResidualScalingFactor;
-                lambdaResidualScalingFactor = originalPenalize * 10000;
+                lambdaResidualScalingFactor = originalPenalize * 10;
                 solveProblem(logSummary);
                 lambdaResidualScalingFactor = originalPenalize;
                 break;
@@ -202,7 +204,7 @@ namespace static_calibration {
             for (const auto &point: dataSet.getParametricPoints<Object>()) {
                 weights.emplace_back(new double(1));
                 correspondenceResiduals.emplace_back(
-                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(100.0)));
+                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(1.0)));
                 lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
                 weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
             }
@@ -210,7 +212,7 @@ namespace static_calibration {
             for (const auto &point: dataSet.getParametricPoints<RoadMark>()) {
                 weights.emplace_back(new double(1));
                 explicitRoadMarkResiduals.emplace_back(
-                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(1.0)));
+                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(100.0)));
                 lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
                 weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
             }
@@ -247,7 +249,7 @@ namespace static_calibration {
                     &rotation.x()
             ));
             rotationResiduals.emplace_back(problem.AddResidualBlock(
-                    static_calibration::calibration::residuals::DistanceFromIntervalResidual::create(-10, 10),
+                    static_calibration::calibration::residuals::DistanceFromIntervalResidual::create(-20, 20),
                     getScaledHuberLoss(rotationResidualScalingFactor),
                     &rotation.y()
             ));

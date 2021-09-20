@@ -75,7 +75,7 @@ int main(int argc, char const *argv[]) {
         }
 
         static_calibration::utils::render(finalFrame, dataSet, t, r, intrinsics, trackbarShowIds, maxRenderDistance);
-        static_calibration::utils::renderText(finalFrame, t, r, 0);
+        static_calibration::utils::renderText(finalFrame, t, r);
 
         cv::imshow(windowName, finalFrame);
     }

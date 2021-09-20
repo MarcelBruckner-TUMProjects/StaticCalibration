@@ -13,6 +13,9 @@ namespace static_calibration {
 
         std::string toYAML(const static_calibration::calibration::CameraPoseEstimationBase &estimator);
 
+
+        std::string mergedMappingToYAML(const objects::DataSet &dataset);
+
         std::string
         toROStf2Node(const calibration::CameraPoseEstimationBase &estimator, const std::string &measurementPoint,
                      const std::string &cameraName);

@@ -8,7 +8,10 @@
 #include <utility>
 #include <iostream>
 #include <random>
+#include <thread>         // std::thread
+
 #include "StaticCalibration/objects/YAMLExtension.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
 
 namespace static_calibration {
     namespace objects {
@@ -127,7 +130,11 @@ namespace static_calibration {
             std::map<std::string, std::string> mapping;
             YAML::Node objectsFileYAML = loadFile(objectsFile);
             for (const auto &node: objectsFileYAML) {
-                mapping[node.first.as<std::string>()] = node.second.as<std::string>();
+                std::string id = node.first.as<std::string>();
+                if (id == "x") {
+                    id = std::to_string(-std::rand());
+                }
+                mapping[id] = node.second.as<std::string>();
             }
             return mapping;
         }
@@ -284,7 +291,12 @@ namespace static_calibration {
         void DataSet::merge() {
             worldObjectsParametricPoints.clear();
             explicitRoadMarksParametricPoints.clear();
-            for (const auto &entry: getMergedMappings()) {
+            auto m = getMappingExtension();
+            if (m.empty()) {
+                m = getMapping();
+            }
+            m = getMergedMappings();
+            for (const auto &entry: m) {
                 auto imageObjectPtr = get<calibration::ImageObject>(entry.second);
                 merge<calibration::Object>(get<calibration::Object>(entry.first), imageObjectPtr);
                 merge<calibration::RoadMark>(get<calibration::RoadMark>(entry.first), imageObjectPtr);
@@ -462,6 +474,32 @@ namespace static_calibration {
             std::map<std::string, std::string> merged = mapping;
             merged.insert(mappingExtension.begin(), mappingExtension.end());
             return merged;
+        }
+
+        double DataSet::evaluate(const Eigen::Vector3d &translation,
+                                 const Eigen::Vector3d &rotation,
+                                 const std::vector<double> &intrinsics) const {
+            double error = 0;
+            for (const auto &entry: getMapping()) {
+                int worldObjPtr = get<calibration::Object>(entry.first);
+                int imgObjPtr = get<calibration::ImageObject>(entry.second);
+                if (imgObjPtr < 0 || worldObjPtr < 0) {
+                    continue;
+                }
+                bool flipped;
+                auto actualPixel = static_calibration::camera::render(translation.data(), rotation.data(),
+                                                                      intrinsics.data(),
+                                                                      worldObjects[worldObjPtr].getOrigin().data(),
+                                                                      flipped);
+                if (flipped) {
+                    error += 1e6;
+                }
+                auto expectedPixel = imageObjects[imgObjPtr].getMid();
+                double distance = (actualPixel - expectedPixel).norm();
+                error += distance;
+            }
+
+            return error;
         }
 
     }

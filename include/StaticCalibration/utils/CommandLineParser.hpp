@@ -88,6 +88,21 @@ namespace static_calibration {
              * Flag if the progress of the ceres optimizer should be logged.
              */
             bool logEstimationProgress;
+
+            /**
+             * The maximum pixel distance between image objects and projected world objects when discovering mappings.
+             */
+            int maxPixelDistanceForMapping;
+
+            /**
+             * The maximum number of world objects each image objects gets matched to when discovering mappings.
+             */
+            int maxMatchesPerImageObject;
+
+            /**
+             * The maximum number of new elements per mapping that are found.
+             */
+            int maxNewElementsPerMapping;
         };
 
         /**

@@ -14,17 +14,24 @@ namespace static_calibration {
             cv::putText(finalFrame, text, {x, y}, cv::FONT_HERSHEY_SIMPLEX, size, color);
         }
 
-        void renderText(cv::Mat &finalFrame, std::stringstream &ss, int run) {
-            int lineHeight = 34;
-            cv::rectangle(finalFrame, {0, finalFrame.rows - lineHeight * 3 - 10}, {500, finalFrame.rows}, {0, 0, 0},
-                          -1);
-            cv::rectangle(finalFrame, {finalFrame.cols - 800 - 10, finalFrame.rows - lineHeight * 12 - 10},
-                          {finalFrame.cols, finalFrame.rows}, {0, 0, 0},
-                          -1);
+        void renderText(cv::Mat &finalFrame, std::stringstream &ss, int run, int maxRuns, double evaluationError) {
+            bool printRun = !(run < 0 || maxRuns < 0 || evaluationError < 0);
 
-            renderLine(finalFrame, "Run: " + std::to_string(run), 5, finalFrame.rows - 2 * lineHeight - 10);
-            renderLine(finalFrame, "GREEN dots: Mapped objects", 5, finalFrame.rows - 1 * lineHeight - 10);
-            renderLine(finalFrame, "RED dots: Unmapped objects", 5, finalFrame.rows - 0 * lineHeight - 10);
+            int lineHeight = 34;
+            double grey = .4;
+            if (printRun) {
+                cv::rectangle(finalFrame,
+                              {0, finalFrame.rows - lineHeight * 2 - 10}, {500, finalFrame.rows}, {grey, grey, grey},
+                              -1);
+                renderLine(finalFrame, "Testing mapping: " + std::to_string(run) + " / " + std::to_string(maxRuns), 5,
+                           finalFrame.rows - 1 * lineHeight - 10);
+                renderLine(finalFrame, "Error: " + std::to_string(evaluationError), 5,
+                           finalFrame.rows - 0 * lineHeight - 10);
+            }
+
+            cv::rectangle(finalFrame, {finalFrame.cols - 800 - 10, finalFrame.rows - lineHeight * 12 - 10},
+                          {finalFrame.cols, finalFrame.rows}, {grey, grey, grey},
+                          -1);
 
             std::string line;
             int i = 0;
@@ -35,21 +42,21 @@ namespace static_calibration {
         }
 
         void renderText(cv::Mat &finalFrame, const static_calibration::calibration::CameraPoseEstimationBase *estimator,
-                        int run) {
+                        int run, int maxRuns, double evaluationError) {
             std::stringstream ss;
             ss << estimator;
-            renderText(finalFrame, ss, run);
+            renderText(finalFrame, ss, run, maxRuns, evaluationError);
         }
 
         void
-        renderText(cv::Mat &finalFrame, const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation, int run) {
+        renderText(cv::Mat &finalFrame, const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation) {
             std::stringstream ss;
             ss << std::fixed;
             ss << std::setprecision(3);
             ss << "T: " << translation[0] << ", " << translation[1] << ", " << translation[2];
             ss << std::endl;
             ss << "R: " << rotation[0] << ", " << rotation[1] << ", " << rotation[2];
-            renderText(finalFrame, ss, run);
+            renderText(finalFrame, ss);
         }
 
         void render(cv::Mat &finalFrame, const std::string &id, const Eigen::Vector3d &object,

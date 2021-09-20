@@ -120,5 +120,23 @@ namespace static_calibration {
 
             return out.c_str();
         }
+
+        std::string mergedMappingToYAML(const objects::DataSet &dataset) {
+            auto mapping = dataset.getMapping();
+            YAML::Emitter out;
+            out << YAML::BeginMap;
+            out << YAML::Comment("Fixed mappings");
+            for (const auto &entry: mapping) {
+                out << YAML::Key << entry.first << YAML::Value << entry.second;
+            }
+            out << YAML::Newline;
+            out << YAML::Comment("Found mappings");
+            mapping = dataset.getMappingExtension();
+            for (const auto &entry: mapping) {
+                out << YAML::Key << entry.first << YAML::Value << entry.second;
+            }
+            out << YAML::EndMap;
+            return out.c_str();
+        }
     }
 }

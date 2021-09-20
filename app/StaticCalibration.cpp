@@ -41,7 +41,7 @@ static_calibration::evaluation::CSVWriter *initCSVWriters(const std::string &bas
  * @param estimator The pose estimator
  */
 void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
-                static_calibration::calibration::CameraPoseEstimationBase *estimator);
+                static_calibration::calibration::CameraPoseEstimationBase *estimator, double evaluationError);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,17 +84,22 @@ int main(int argc, char const *argv[]) {
     Eigen::Vector3d rotation(parsedOptions.rotation.data());
     std::vector<double> intrinsics = parsedOptions.intrinsics;
 
+    Eigen::Vector3d initialTranslation = translation;
+    Eigen::Vector3d initialRotation = rotation;
+    std::vector<double> initialIntrinsics = intrinsics;
+
+    bool mappingsCreated = false;
     std::vector<std::map<std::string, std::string>> mappings;
-    std::vector<int> testedMappings;
-    std::vector<int> untestedMappings;
 
     int run = -1;
+    int numMappings = 0;
     int maxRuns = parsedOptions.evaluationRuns;
+    double evaluationError = -1;
 
     while (run < maxRuns) {
         if (estimator->isEstimationFinished()) {
             if (run >= 0) {
-                auto outDir = basename / std::to_string(estimator->getTotalLoss());
+                auto outDir = basename / std::to_string(evaluationError);
                 auto baseOutDir = outDir;
                 for (int fileExtension = 0;; ++fileExtension) {
                     if (!boost::filesystem::exists(outDir)) {
@@ -104,7 +109,7 @@ int main(int argc, char const *argv[]) {
                 }
                 boost::filesystem::create_directories(outDir);
                 auto csvWriter = initCSVWriters(outDir.string());
-                writeToCSV(csvWriter, run, estimator);
+                writeToCSV(csvWriter, run, estimator, evaluationError);
 
                 std::ofstream outFile;
 
@@ -123,6 +128,12 @@ int main(int argc, char const *argv[]) {
                 outFile << intrinsicsYAML;
                 outFile.close();
 
+                outFile.open((outDir / "mapping.yaml").string());
+                auto mappingYAML = static_calibration::utils::mergedMappingToYAML(dataSet);
+                std::cout << mappingYAML << std::endl;
+                outFile << mappingYAML;
+                outFile.close();
+
 #ifdef WITH_OPENCV
                 cv::Mat outFrame = evaluationFrame * 0.5;
                 static_calibration::utils::render(outFrame, dataSet, translation, rotation, intrinsics, true,
@@ -135,20 +146,30 @@ int main(int argc, char const *argv[]) {
                 cv::imwrite((outDir / "without_ids.png").string(),
                             static_calibration::utils::removeAlphaChannel(outFrame));
 #endif //WITH_OPENCV
-            }
 
-            if (mappings.empty()) {
-                mappings = dataSet.createAllMappings(translation, rotation, intrinsics, 1000, 3, -1);
-            } else {
+                if (mappings.empty()) {
+                    if (numMappings > 0) {
+                        break;
+                    }
+                    // After first run only with fixed mapping, set the new initial extrinsics to the found ones.
+                    initialTranslation = translation;
+                    initialRotation = rotation;
+                    initialIntrinsics = intrinsics;
+                    mappings = dataSet.createAllMappings(translation, rotation, intrinsics,
+                                                         parsedOptions.maxPixelDistanceForMapping,
+                                                         parsedOptions.maxMatchesPerImageObject,
+                                                         parsedOptions.maxNewElementsPerMapping);
+                    numMappings = mappings.size();
+                }
                 dataSet.setMappingExtension(mappings[mappings.size() - 1]);
                 mappings.pop_back();
             }
 
             run++;
             estimator->setDataSet(dataSet);
-            estimator->guessTranslation(parsedOptions.translation);
-            estimator->guessRotation(parsedOptions.rotation);
-            estimator->setIntrinsics(parsedOptions.intrinsics);
+            estimator->guessTranslation(initialTranslation);
+            estimator->guessRotation(initialRotation);
+            estimator->setIntrinsics(initialIntrinsics);
 
 #ifdef WITH_OPENCV
             estimator->estimateAsync(parsedOptions.logEstimationProgress);
@@ -165,7 +186,8 @@ int main(int argc, char const *argv[]) {
         finalFrame = evaluationFrame * 0.5;
         static_calibration::utils::render(finalFrame, dataSet, translation, rotation, intrinsics, trackbarShowIds,
                                           maxRenderDistance);
-//        static_calibration::utils::renderText(finalFrame, estimator, run);
+        evaluationError = dataSet.evaluate(translation, rotation, intrinsics);
+        static_calibration::utils::renderText(finalFrame, estimator, run, numMappings, evaluationError);
 
         cv::imshow(windowName, finalFrame);
 
@@ -194,6 +216,7 @@ static_calibration::evaluation::CSVWriter *initCSVWriters(const std::string &bas
     *csvWriter << "Run"
                << "Correspondences"
                << "Valid Solution"
+               << "Evaluation Error"
                << "Loss"
                << "Loss [Correspondences]"
                << "Loss [Road Marks]"
@@ -221,7 +244,7 @@ static_calibration::evaluation::CSVWriter *initCSVWriters(const std::string &bas
 }
 
 void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
-                static_calibration::calibration::CameraPoseEstimationBase *estimator) {
+                static_calibration::calibration::CameraPoseEstimationBase *estimator, double evaluationError) {
     auto weights = estimator->getWeights();
 
     double min_w = 1e100;
@@ -240,6 +263,7 @@ void writeToCSV(static_calibration::evaluation::CSVWriter *csvWriter, int run,
     *csvWriter << run
                << (int) weights.size()
                << estimator->hasFoundValidSolution()
+               << evaluationError
                << estimator->getTotalLoss()
                << estimator->getCorrespondencesLoss()
                << estimator->getExplicitRoadMarksLoss()

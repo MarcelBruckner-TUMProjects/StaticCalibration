@@ -113,7 +113,10 @@ namespace static_calibration {
                     translation,
                     rotation,
                     getOrDefault(config, "optimize_intrinsics", false),
-                    getOrDefault(config, "log_optimization", true)
+                    getOrDefault(config, "log_optimization", true),
+                    getOrDefault(config, "max_pixel_distance_for_mapping", 1000),
+                    getOrDefault(config, "max_matches_per_image_object", 3),
+                    getOrDefault(config, "max_new_elements_per_mapping", -1)
             };
 
             return parsedOptions;

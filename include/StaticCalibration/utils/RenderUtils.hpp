@@ -24,7 +24,8 @@ namespace static_calibration {
                         const cv::Vec3d &color = {1, 1, 0});
 
         void
-        renderText(cv::Mat &finalFrame, std::stringstream &ss, int run);
+        renderText(cv::Mat &finalFrame, std::stringstream &ss, int run = -1, int maxRuns = -1,
+                   double evaluationError = -1);
 
         /**
          * Renders the current state of the estimator and some exemplary text onto the frame.
@@ -35,11 +36,10 @@ namespace static_calibration {
          */
         void
         renderText(cv::Mat &finalFrame, const static_calibration::calibration::CameraPoseEstimationBase *estimator,
-                   int run);
+                   int run = -1, int maxRuns = -1, double evaluationError = -1);
 
         void
-        renderText(cv::Mat &finalFrame, const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation,
-                   int run);
+        renderText(cv::Mat &finalFrame, const Eigen::Vector3d &translation, const Eigen::Vector3d &rotation);
 
         /**
          * Renders an object onto the frame.
