@@ -71,68 +71,12 @@ cmake --build . -j8
 
 You have to create a `<config>.yaml` file to provide the necessary parameters to the static calibration program.
 
-See `config/` for examples.
-
-```yaml
-# The name of the measurement point, i.e. the gantry bridge
-measurement_point: <string>
-
-# The name of the camera at the given measurement point
-camera_name: <string>
-
-# The absolute or relative path to the file containing the objects
-# The objects need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
-# To create the objects file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
-objects_file: <string>
-
-# The absolute or relative path to the file containing the lane samples
-# The lane samples need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
-# To create the lane samples file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
-lane_samples_file: <string>
-
-# The absolute or relative path to the file containing the explicit road marks
-# The explicit road marks need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
-# To create the explicit road marks file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
-explicit_road_marks_file: <string>
-
-# The absolute or relative path to the file containing the marked pixels
-# To create the pixels file from a keyframe extracted from a video visit: https://github.com/Brucknem/DataAnnotationTools
-pixels_file: <string>
-
-# The intrinsic camera parameters according to the pinhole camera model
-# All parameters need to be in pixels (except for skew)
-# To get information about the used pinhole camera model please visit: https://en.wikipedia.org/wiki/Pinhole_camera_model
-intrinsics:
-  - <double>  # The focal length along the horizontal axis 
-  - <double>  # The focal length along the vertical axis
-  - <double>  # The principal point coordinate along the horizontal axis
-  - <double>  # The principal point coordinate along the vertical axis
-  - <double>  # [Optional] The skew, defaults to 0
-
-# [Optional] Only used when compiled with -DWITH_OPENCV=ON
-# The absolute or relative path to the file containing the background frame, used during evaluation
-background_frame: <string>
-
-# [Optional] Optimize intrinsic camera parameters together with the extrinsics, defaults to False
-optimize_intrinsics: <True | False>
-
-# [Optional] Number of runs during evaluation, defaults to 10
-evaluation_runs: <integer>
-
-# [Optional] Log the optimization progress, defaults to True
-log_optimization: <True | False>
-```
+See `config/` for examples. `config/s50_s_near/config.yaml` is fully commented.
 
 ### Running
 
 ```shell
 ./app/StaticCalibration --config <path_to_config_file>
-```
-
-### Evaluating
-
-```shell
-./evaluate/EvaluateStaticCalibration --config <path_to_config_file>
 ```
 
 ### Testing
@@ -147,13 +91,9 @@ ctest --verbose
 
 The calibration requires a 2D-3D mapping from pixels to objects to estimate the 6DoF pose of the camera.
 
+Examples to the files can be found in `config/` and `misc/`.
+
 ## Objects
-
-```shell
--o [ --objects_file ] <filename>
-```
-
-The `objects_file` is required to be in the YAML format as specified:
 
 ```yaml
 objects:
@@ -164,7 +104,7 @@ objects:
     # Has to be permanentDelineator. No other name is currently implemented.
     name: permanentDelineator
     # [XYZ | East/North/Height] coordinates in a right-handed coordinate system. 
-    utm_coord: [ 692571.92953127041, 5339110.7990111383, 549.29530761491162 ]
+    utm_coord: [ -878.08065099595115, 858.9148813476786, -1.5917528217373729 ]
     # The height in the same coordinate system as in utm_coord.
     height: 1.135
   - …

@@ -315,7 +315,11 @@ namespace static_calibration {
                                                                     maxElementsInDistance);
             std::vector<std::pair<std::string, std::string>> mappings;
 
+            int i = 0;
             for (const auto &entry: extendedMapping) {
+                if (maxElementsPerMapping > 0 && ++i > maxElementsPerMapping) {
+                    break;
+                }
                 std::string worldId = entry.first;
                 for (const auto &id: entry.second) {
                     mappings.emplace_back(std::make_pair(worldId, id));
@@ -325,7 +329,7 @@ namespace static_calibration {
             auto allSubsets = generateAllSubsets(mappings, maxElementsPerMapping);
 //            std::cout << "Subsets: " << allSubsets.size() << std::endl;
             std::vector<std::map<std::string, std::string>> result(allSubsets.size());
-            int i = 0;
+            i = 0;
             for (const auto &subset: allSubsets) {
                 for (const auto &entry: subset) {
                     result[i][entry.second] = entry.first;
@@ -506,14 +510,15 @@ namespace static_calibration {
                                                                       worldObject.getOrigin().data(),
                                                                       flipped);
                 if (flipped) {
-                    error += 1e6;
+                    error += 1e5;
+                } else {
+                    auto expectedPixel = imageObjects[imgObjPtr].getMid();
+                    double distance = (actualPixel - expectedPixel).norm();
+                    if (isRoadMark) {
+                        distance *= mapping.size();
+                    }
+                    error += distance;
                 }
-                auto expectedPixel = imageObjects[imgObjPtr].getMid();
-                double distance = (actualPixel - expectedPixel).norm();
-                if (isRoadMark) {
-                    distance *= 10;
-                }
-                error += distance;
             }
 
             return error;

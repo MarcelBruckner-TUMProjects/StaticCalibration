@@ -124,8 +124,8 @@ namespace static_calibration {
 //                invalidSolution = invalidSolution || invalidLambdas;
 //                invalidSolution = invalidSolution || invalidCorrespondencesLoss;
 //                invalidSolution = invalidSolution || invalidLosses;
-                invalidSolution = invalidSolution || invalidTranslation;
-                invalidSolution = invalidSolution || invalidRotation;
+//                invalidSolution = invalidSolution || invalidTranslation;
+//                invalidSolution = invalidSolution || invalidRotation;
 
                 if (invalidSolution) {
                     continue;
@@ -212,7 +212,8 @@ namespace static_calibration {
             for (const auto &point: dataSet.getParametricPoints<RoadMark>()) {
                 weights.emplace_back(new double(1));
                 explicitRoadMarkResiduals.emplace_back(
-                        addCorrespondenceResidualBlock(problem, point, new ceres::HuberLoss(100.0)));
+                        addCorrespondenceResidualBlock(problem, point,
+                                                       new ceres::HuberLoss(dataSet.getMapping().size())));
                 lambdaResiduals.emplace_back(addLambdaResidualBlock(problem, point));
                 weightResiduals.emplace_back(addWeightResidualBlock(problem, weights[weights.size() - 1]));
             }

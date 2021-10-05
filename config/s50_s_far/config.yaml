@@ -1,0 +1,19 @@
+measurement_point: "s50"
+camera_name: "s_cam_far"
+objects_file: "misc/objects.yaml"
+lane_samples_file: "misc/lane_samples.yaml"
+explicit_road_marks_file: "misc/explicit_road_marks.yaml"
+pixels_file: "config/s50_s_far/marked_pixels.yaml"
+mapping_file: "config/s50_s_far/mapping.yaml"
+background_frame: "config/s50_s_far/frame.bmp"
+output_dir: "config/s50_s_far/results"
+intrinsics: [ 8878.579697, 8811.724025, 584.217565, 465.520403 ]
+ros_tf2_coordinates: true
+translation: [ 9.1238707645106523, -21.689666631707659, 8.9865690443508086 ]
+rotation: [ 168.18114480192273, 4.7088640510142454, 5.070801769848523 ]
+optimize_intrinsics: False
+evaluation_runs: 1000
+log_optimization: True
+max_pixel_distance_for_mapping: 1000
+max_matches_per_image_object: 3
+max_new_elements_per_mapping: 5

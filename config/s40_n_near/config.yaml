@@ -1,0 +1,16 @@
+measurement_point: "s40"
+camera_name: "s_cam_near"
+objects_file: "misc/objects.yaml"
+lane_samples_file: "misc/lane_samples.yaml"
+explicit_road_marks_file: "misc/explicit_road_marks.yaml"
+pixels_file: "config/s40_n_near/marked_pixels.yaml"
+mapping_file: "config/s40_n_near/mapping.yaml"
+background_frame: "config/s40_n_near/frame.bmp"
+output_dir: "config/s40_n_near/results"
+intrinsics: [ 2788.860717, 2783.312609, 907.839058, 589.071478 ]
+ros_tf2_coordinates: true
+translation: [ -444.62679384269882, 117.6633265127147, 10.015564539146094 ]
+rotation: [ -25.070043672011732, 13.246715975181758, -1.3265076992368805 ]
+optimize_intrinsics: False
+evaluation_runs: 1000
+log_optimization: True

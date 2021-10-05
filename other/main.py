@@ -20,5 +20,14 @@ def plot(path=""):
         writer.add_scalar(str(path)[1:], p[1], i)
 
 
+def plot_all(path=""):
+    path = Path(path).absolute()
+    if not path.exists():
+        print(f'{path} does not exist')
+        return
+    for p in path.iterdir():
+        not p.is_file() and plot(p)
+
+
 if __name__ == '__main__':
-    fire.Fire(plot)
+    fire.Fire(plot_all)

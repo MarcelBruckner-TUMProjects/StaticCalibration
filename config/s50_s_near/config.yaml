@@ -1,0 +1,72 @@
+# The name of the measurement point, i.e. the gantry bridge
+measurement_point: "s50"
+
+# The name of the camera at the given measurement point
+camera_name: "s_cam_near"
+
+# The absolute or relative path to the file containing the objects
+# The objects need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# To create the objects file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
+objects_file: "misc/objects.yaml"
+
+# The absolute or relative path to the file containing the lane samples
+# The lane samples need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# To create the lane samples file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
+lane_samples_file: "misc/lane_samples.yaml"
+
+# The absolute or relative path to the file containing the explicit road marks
+# The explicit road marks need to be in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# To create the explicit road marks file from an OpenDRIVE HD map visit: https://github.com/Brucknem/OpenDRIVE
+explicit_road_marks_file: "misc/explicit_road_marks.yaml"
+
+# The absolute or relative path to the file containing the marked pixels
+# To create the pixels file from a keyframe extracted from a video visit: https://github.com/Brucknem/DataAnnotationTools
+pixels_file: "config/s50_s_near/marked_pixels.yaml"
+
+# The absolute or relative path to the file containing the mapping from objects in the world to objects in the camera image
+# See t
+mapping_file: "config/s50_s_near/mapping.yaml"
+
+# [Optional] Only used when compiled with -DWITH_OPENCV=ON
+# The absolute or relative path to the file containing the background frame, used during evaluation
+background_frame: "config/s50_s_near/frame.bmp"
+
+# The absolute or relative path to the directory where the results are written to
+output_dir: "config/s50_s_near/results"
+
+# The intrinsic camera parameters according to the pinhole camera model
+# All parameters need to be in pixels (except for skew)
+# To get information about the used pinhole camera model please visit: https://en.wikipedia.org/wiki/Pinhole_camera_model
+intrinsics: [ 2820.460044, 2816.221512, 960.667182, 525.863289 ]
+
+# Flag if the given translation and rotation are in the ROS tf2 coordinate system
+# The coordinates need to be given in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+# The coordinates are transformed into the right-handed coordinate system with the X-axis pointing north, the Y-axis pointing west and the Z-axis giving the height
+ros_tf2_coordinates: true
+
+# The initial guess for the translation in [X, Y, Z] coordinates.
+# The coordinates need to be given in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+translation: [ -4.1078418861556374, -21.689666631707659, 8.9865690443508086 ]
+
+# The initial guess for the translation in [X, Y, Z] angles.
+# The coordinates need to be given in the right-handed coordinate system with the X-axis pointing east, the Y-axis pointing north and the Z-axis giving the height
+rotation: [ 163.52272048706993, 14.126771306535744, 0.383374369356071 ]
+
+# [Optional] Optimize intrinsic camera parameters together with the extrinsics, defaults to False
+optimize_intrinsics: False
+
+# [Optional] Number of runs during evaluation, defaults to 10
+evaluation_runs: 1000
+
+# [Optional] Log the optimization progress, defaults to True
+log_optimization: True
+
+# [Optional] When discovering new mappings, this is the maximum distance that a marked region in the image and the rendered world objects can be apart to be considered a possible mapping, defaults to 1000
+max_pixel_distance_for_mapping: 1000
+
+# [Optional] When discovering new mappings, this is the maximum number of world objects hat a marked region can be matched to, defaults to 5
+# The remaining matches are the closest in image space
+max_matches_per_image_object: 3
+
+# [Optional] When discovering new mappings, this is the maximum number of new matches per mapping, defaults to 5
+max_new_elements_per_mapping: 5

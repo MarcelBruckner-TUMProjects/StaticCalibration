@@ -1,0 +1,19 @@
+measurement_point: "s40"
+camera_name: "s_cam_far"
+objects_file: "misc/objects.yaml"
+lane_samples_file: "misc/lane_samples.yaml"
+explicit_road_marks_file: "misc/explicit_road_marks.yaml"
+pixels_file: "config/s40_n_far/marked_pixels.yaml"
+mapping_file: "config/s40_n_far/mapping.yaml"
+background_frame: "config/s40_n_far/frame.png"
+output_dir: "config/s40_n_far/results"
+intrinsics: [ 9023.482825, 9014.504360, 1222.314303, 557.541182 ]
+ros_tf2_coordinates: true
+translation: [ -444.62679384269882, 117.6633265127147, 10.015564539146094 ]
+rotation: [ -20.777346474546256, 3.9869309010142331, 0.016366255535430613 ]
+optimize_intrinsics: False
+evaluation_runs: 1000
+log_optimization: True
+max_pixel_distance_for_mapping: 1000
+max_matches_per_image_object: 3
+max_new_elements_per_mapping: 5
