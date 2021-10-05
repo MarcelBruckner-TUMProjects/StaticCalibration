@@ -103,6 +103,11 @@ namespace static_calibration {
              * The maximum number of new elements per mapping that are found.
              */
             int maxNewElementsPerMapping;
+
+            /**
+             * Flag if to write the rendered frames to disk.
+             */
+            bool writeVideo;
         };
 
         /**

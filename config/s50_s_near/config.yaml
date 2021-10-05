@@ -70,3 +70,6 @@ max_matches_per_image_object: 3
 
 # [Optional] When discovering new mappings, this is the maximum number of new matches per mapping, defaults to 5
 max_new_elements_per_mapping: 5
+
+# [Optional] Flag to write the rendered frames as a sequence to disk.
+write_video: True

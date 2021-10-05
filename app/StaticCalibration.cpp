@@ -52,11 +52,14 @@ int main(int argc, char const *argv[]) {
     srandom(time(nullptr));
     auto parsedOptions = static_calibration::utils::parseCommandLine(argc, argv);
     auto basename = boost::filesystem::path(parsedOptions.outputDir);
+
     auto resultsDir = basename / "results";
     auto imagesDir = basename / "imgs";
-    boost::filesystem::create_directories(imagesDir);
-    boost::filesystem::create_directories(imagesDir / "with_id");
-    boost::filesystem::create_directories(imagesDir / "without_id");
+    if (parsedOptions.writeVideo) {
+        boost::filesystem::create_directories(imagesDir);
+        boost::filesystem::create_directories(imagesDir / "with_id");
+        boost::filesystem::create_directories(imagesDir / "without_id");
+    }
 
     auto dataSet = static_calibration::objects::DataSet(parsedOptions.objectsFile,
                                                         parsedOptions.explicitRoadMarksFile,
@@ -125,14 +128,15 @@ int main(int argc, char const *argv[]) {
             break;
         }
 
-        cv::imwrite((imagesDir / "with_id" / (std::to_string(it) + ".png")).c_str(),
-                    static_calibration::utils::removeAlphaChannel(finalFrame));
-        cv::Mat writeFrame = evaluationFrame * 0.5;
-        static_calibration::utils::render(writeFrame, dataSet, translation, rotation, intrinsics, false,
-                                          maxRenderDistance);
-        cv::imwrite((imagesDir / "without_id" / (std::to_string(it) + ".png")).c_str(),
-                    static_calibration::utils::removeAlphaChannel(writeFrame));
-
+        if (parsedOptions.writeVideo) {
+            cv::imwrite((imagesDir / "with_id" / (std::to_string(it) + ".png")).c_str(),
+                        static_calibration::utils::removeAlphaChannel(finalFrame));
+            cv::Mat writeFrame = evaluationFrame * 0.5;
+            static_calibration::utils::render(writeFrame, dataSet, translation, rotation, intrinsics, false,
+                                              maxRenderDistance);
+            cv::imwrite((imagesDir / "without_id" / (std::to_string(it) + ".png")).c_str(),
+                        static_calibration::utils::removeAlphaChannel(writeFrame));
+        }
 #endif //WITH_OPENCV
         if (estimator->isEstimationFinished()) {
             if (run >= 0) {
@@ -178,16 +182,16 @@ int main(int argc, char const *argv[]) {
                 outFile.close();
 
 #ifdef WITH_OPENCV
-//                cv::Mat outFrame = evaluationFrame * 0.5;
-//                static_calibration::utils::render(outFrame, dataSet, translation, rotation, intrinsics, true,
-//                                                  maxRenderDistance);
-//                cv::imwrite((outDir / "with_ids.png").string(),
-//                            static_calibration::utils::removeAlphaChannel(outFrame));
-//                outFrame = evaluationFrame * 0.5;
-//                static_calibration::utils::render(outFrame, dataSet, translation, rotation, intrinsics, false,
-//                                                  maxRenderDistance);
-//                cv::imwrite((outDir / "without_ids.png").string(),
-//                            static_calibration::utils::removeAlphaChannel(outFrame));
+                cv::Mat outFrame = evaluationFrame * 0.5;
+                static_calibration::utils::render(outFrame, dataSet, translation, rotation, intrinsics, true,
+                                                  maxRenderDistance);
+                cv::imwrite((outDir / "with_ids.png").string(),
+                            static_calibration::utils::removeAlphaChannel(outFrame));
+                outFrame = evaluationFrame * 0.5;
+                static_calibration::utils::render(outFrame, dataSet, translation, rotation, intrinsics, false,
+                                                  maxRenderDistance);
+                cv::imwrite((outDir / "without_ids.png").string(),
+                            static_calibration::utils::removeAlphaChannel(outFrame));
 #endif //WITH_OPENCV
 
                 if (mappings.empty()) {

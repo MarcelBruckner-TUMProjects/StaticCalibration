@@ -117,6 +117,7 @@ namespace static_calibration {
                     getOrDefault(config, "max_pixel_distance_for_mapping", 1000),
                     getOrDefault(config, "max_matches_per_image_object", 5),
                     getOrDefault(config, "max_new_elements_per_mapping", -1),
+                    getOrDefault(config, "write_video", false)
             };
 
             return parsedOptions;
