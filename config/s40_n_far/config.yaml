@@ -11,7 +11,7 @@ intrinsics: [ 9023.482825, 9014.504360, 1222.314303, 557.541182 ]
 ros_tf2_coordinates: true
 translation: [ -444.62679384269882, 117.6633265127147, 10.015564539146094 ]
 rotation: [ -20.777346474546256, 3.9869309010142331, 0.016366255535430613 ]
-optimize_intrinsics: False
+optimize_intrinsics: True
 evaluation_runs: 1000
 log_optimization: True
 max_pixel_distance_for_mapping: 1000

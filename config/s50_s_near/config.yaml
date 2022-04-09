@@ -53,7 +53,7 @@ translation: [ -4.1078418861556374, -21.689666631707659, 8.9865690443508086 ]
 rotation: [ 163.52272048706993, 14.126771306535744, 0.383374369356071 ]
 
 # [Optional] Optimize intrinsic camera parameters together with the extrinsics, defaults to False
-optimize_intrinsics: False
+optimize_intrinsics: True
 
 # [Optional] Number of runs during evaluation, defaults to 10
 evaluation_runs: 1000
